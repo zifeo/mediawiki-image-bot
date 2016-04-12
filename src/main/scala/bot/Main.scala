@@ -3,7 +3,7 @@ package bot
 import java.io.File
 import java.nio.file.{Files, StandardCopyOption}
 
-import com.flickr4java.flickr.photos.{SearchParameters, Size}
+import com.flickr4java.flickr.photos.{Photo, SearchParameters, Size}
 import com.flickr4java.flickr.{Flickr, REST}
 import net.sourceforge.jwbf.core.contentRep.Article
 import net.sourceforge.jwbf.mediawiki.actions.queries.AllPageTitles
@@ -40,13 +40,7 @@ object Main extends App {
 
   val flickr = new Flickr(config.getString("flickr.key"), config.getString("flickr.secret"), new REST)
 
-  val params = new SearchParameters
-  params.setText("EPFL")
-  params.setLicense(licenses.keys.mkString(",")) // Creative Commons
-  params.setMedia("photos")
-  params.setSort(SearchParameters.INTERESTINGNESS_DESC)
-  params.setSafeSearch(Flickr.SAFETYLEVEL_SAFE)
-  val res = flickr.getPhotosInterface.search(params, 5, 1).asScala.toList
+  val res = searchPhotos("EPFL")
 
   for (pid <- res.take(1)) {
 
@@ -59,14 +53,29 @@ object Main extends App {
     println(Option(photo.getOwner.getRealName).filter(_.nonEmpty))
     println(photo.getMediumUrl)
 
+    val file = fileFromPhoto(photo)
+
+    println("*****")
+
+  }
+
+  def searchPhotos(terms: String): List[Photo] = {
+    val params = new SearchParameters
+    params.setText(terms)
+    params.setLicense(licenses.keys.mkString(","))
+    params.setMedia("photos")
+    params.setSort(SearchParameters.INTERESTINGNESS_DESC)
+    params.setSafeSearch(Flickr.SAFETYLEVEL_SAFE)
+    flickr.getPhotosInterface.search(params, 5, 1).asScala.toList
+  }
+
+  def fileFromPhoto(photo: Photo): File = {
     val file = File.createTempFile("mediawiki-image-bot-", ".jpg")
     file.deleteOnExit()
     val stream = flickr.getPhotosInterface.getImageAsStream(photo, Size.MEDIUM)
     Files.copy(stream, file.toPath, StandardCopyOption.REPLACE_EXISTING)
     stream.close()
-
-    println("*****")
-
+    file
   }
 
   def tokenizer(content: String, regex: Regex): List[String] =
