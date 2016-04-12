@@ -48,4 +48,8 @@ object Main extends App {
   //bot.login(config.getString("login"), config.getString("password"))
   //article.save()
 
+  // val file = new SimpleFile(f.getAbsolutePath());
+  // file.addText(israelnationaltrail.generateCommonsTemplate());
+  // wikiBot.getPerformedAction(new FileUpload(file, wikiBot));
+
 }
