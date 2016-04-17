@@ -38,46 +38,6 @@ object Main extends App {
     6 -> "http://creativecommons.org/licenses/by-nd/2.0/"
   )
 
-  val flickr = new Flickr(config.getString("flickr.key"), config.getString("flickr.secret"), new REST)
-
-  val res = searchPhotos("EPFL")
-
-  for (pid <- res.take(1)) {
-
-    val photo = flickr.getPhotosInterface.getInfo(pid.getId, null)
-    println(photo.getTitle)
-    println(Option(photo.getDescription))
-    println(photo.getTags.asScala.toList.map(_.getValue))
-    println(licenses(photo.getLicense.toInt))
-    println(photo.getOwner.getUsername)
-    println(Option(photo.getOwner.getRealName).filter(_.nonEmpty))
-    println(photo.getMediumUrl)
-
-    val file = fileFromPhoto(photo)
-
-    println("*****")
-
-  }
-
-  def searchPhotos(terms: String): List[Photo] = {
-    val params = new SearchParameters
-    params.setText(terms)
-    params.setLicense(licenses.keys.mkString(","))
-    params.setMedia("photos")
-    params.setSort(SearchParameters.INTERESTINGNESS_DESC)
-    params.setSafeSearch(Flickr.SAFETYLEVEL_SAFE)
-    flickr.getPhotosInterface.search(params, 5, 1).asScala.toList
-  }
-
-  def fileFromPhoto(photo: Photo): File = {
-    val file = File.createTempFile("mediawiki-image-bot-", ".jpg")
-    file.deleteOnExit()
-    val stream = flickr.getPhotosInterface.getImageAsStream(photo, Size.MEDIUM)
-    Files.copy(stream, file.toPath, StandardCopyOption.REPLACE_EXISTING)
-    stream.close()
-    file
-  }
-
   def tokenizer(content: String, regex: Regex): List[String] =
     regex.findAllMatchIn(content).map(_.group(1).trim).toList
 
@@ -102,5 +62,13 @@ object Main extends App {
   //bot.login(config.getString("login"), config.getString("password"))
   //article.save()
   //bot.getPerformedAction(new FileUpload(new SimpleFile(file), bot))
+
+  allPages.foreach(p => {
+    println(p)
+    val i = Utils.parseRequest(p)
+    if (i != null) {
+      i.saveToFile()
+    }
+  })
 
 }
