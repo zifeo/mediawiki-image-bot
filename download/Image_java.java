@@ -1,10 +1,10 @@
 package bot;
 
-public class Image {
+public class Image_java {
 
     private final String page, orig, thumb, snippet;
 
-    public Image(String page, String orig, String thumb, String snippet) {
+    public Image_java(String page, String orig, String thumb, String snippet) {
         this.page = page;
         this.orig = orig;
         this.thumb = thumb;
@@ -12,7 +12,7 @@ public class Image {
         System.out.println(toString());
     }
 
-    public Image(String page, String orig, String snippet) {
+    public Image_java(String page, String orig, String snippet) {
         this(page, orig, "", snippet);
     }
 

@@ -42,7 +42,7 @@ public class Utils {
         }
     }
 
-    public static Image parseRequest(String page) {
+    public static Image_java parseRequest(String page) {
         try {
             String content = getContent(page);
             if (content.isEmpty()) {
@@ -61,7 +61,7 @@ public class Utils {
 
             }
             JSONObject results = obj.getJSONArray("items").getJSONObject(0);
-            return new Image(page, results.getString("link"), results.getJSONObject("image").getString("thumbnailLink"), results.getString("snippet"));
+            return new Image_java(page, results.getString("link"), results.getJSONObject("image").getString("thumbnailLink"), results.getString("snippet"));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
