@@ -10,8 +10,6 @@ import scala.io.Source
 
 object IOUtils {
 
-  private val MAX_SIZE = 640
-
   private var idx = 0
   private val KEYS = Array(
     "AIzaSyBwHV-De4PF9HgaVNeAvXqtSeLj2Nyg0fk",
@@ -46,10 +44,10 @@ object IOUtils {
         case _: Exception =>
       }
       val results = obj.getJSONArray("items").getJSONObject(0)
-      new Image(page, results.getString("link"), results.getJSONObject("image").getString("thumbnailLink"), results.getString("snippet"))
+      new Image(page, results.getString("link"), results.getString("snippet"))
     }
     catch {
-      case _: Exception => null
+      case e: Exception => e.printStackTrace(); null
     }
   }
 
@@ -77,13 +75,14 @@ object IOUtils {
     }
   }
 
-  def resize(path: String) {
+  def resize(from: String, to: String, size: Int) {
     try {
-      val file = new File(path)
-      Thumbnails.of(file).size(MAX_SIZE, MAX_SIZE).outputFormat("jpg").toFile(file)
+      val fileFrom = new File(from)
+      val fileTo = new File(to)
+      Thumbnails.of(fileFrom).size(size, size).outputFormat("jpg").toFile(fileTo)
     }
     catch {
-      case _: Exception =>
+      case e: Exception => e.printStackTrace()
     }
   }
 
