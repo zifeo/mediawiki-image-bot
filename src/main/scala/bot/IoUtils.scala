@@ -22,12 +22,12 @@ object IOUtils {
     "AIzaSyA3RX2RWCpjbgyjEXaiJ47NK8SI-VcQ-dE")
 
   private val BASE_URL_1 = "https://www.googleapis.com/customsearch/v1?q="
-  private val BASE_URL_2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=1&rights=cc_attribute&searchType=image&key="
+  private val BASE_URL_2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
 
   private def googleRequest(link: String): String =
     Source.fromURL(BASE_URL_1 + link.replaceAll(" ", "+") + BASE_URL_2 + KEYS(idx)).mkString
 
-  def parseRequest(page: String): Image = {
+  def parseRequest(page: String): List[Image] = {
     try {
       var content = googleRequest(page)
       if (content.isEmpty) {
@@ -43,11 +43,13 @@ object IOUtils {
       } catch {
         case _: Exception =>
       }
-      val results = obj.getJSONArray("items").getJSONObject(0)
-      new Image(page, results.getString("link"), results.getString("snippet"))
+      val items = obj.getJSONArray("items")
+      Stream.range(0, obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("count"))
+        .map(i => items.getJSONObject(i)).map(j => new Image(page, j.getString("link"), j.getString("snippet")))
+        .toList
     }
     catch {
-      case e: Exception => e.printStackTrace(); null
+      case e: Exception => List()
     }
   }
 
@@ -71,7 +73,7 @@ object IOUtils {
       true
     }
     catch {
-      case e: Exception => e.printStackTrace(); false
+      case e: Exception => false
     }
   }
 
@@ -82,7 +84,7 @@ object IOUtils {
       Thumbnails.of(fileFrom).size(size, size).outputFormat("jpg").toFile(fileTo)
     }
     catch {
-      case e: Exception => e.printStackTrace()
+      case e: Exception =>
     }
   }
 

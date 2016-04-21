@@ -26,8 +26,8 @@ object JSONParser {
 
     new WikiPage(
       json.getString("title"),
-      json.getInt("timestamp"),
-      json.getInt("revisionId"),
+      json.getLong("timestamp"),
+      json.getString("revisionId"),
       json.getString("editor"),
       json.getString("editSummary"),
       PageType.withName(json.getString("type").toUpperCase),
