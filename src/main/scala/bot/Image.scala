@@ -1,5 +1,7 @@
 package bot
 
+import java.io.File
+
 import bot.IOUtils._
 
 class Image(val page: String, val link: String, val snippet: String) {
@@ -10,11 +12,15 @@ class Image(val page: String, val link: String, val snippet: String) {
 
   def saveToFile(): String = {
     if (link != null && !link.isEmpty) {
-      val path = BASE_PATH + page + "/" + snippet.toLowerCase.replaceAll(" ", "_").replaceAll(".jpg", "").replaceAll("file:", "") + "_"
+      val path = BASE_PATH + page + "/" + snippet.toLowerCase.replaceAll(" ", "_").replaceAll(".jpg", "").replaceAll("file:", "").replace('|', '-') + "_"
       val fileName = path + "original.jpg"
-      downloadImageFromURL(link, BASE_PATH + page + "/", fileName)
-      resize(fileName, fileName, ORIG_SIZE)
-      resize(fileName, path + "thumbnail.jpg", THUMB_SIZE)
+      val from = new File(fileName)
+      val to = new File(path + "thumbnail.jpg")
+      if (!from.exists() && !to.exists()) {
+        downloadImageFromURL(link, BASE_PATH + page + "/", fileName)
+        resize(fileName, from.getPath, ORIG_SIZE)
+        resize(fileName, to.getPath, THUMB_SIZE)
+      }
       path
     } else {
       ""

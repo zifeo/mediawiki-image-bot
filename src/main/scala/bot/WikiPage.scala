@@ -70,26 +70,34 @@ case class WikiPage(
     if (image.isDefined) {
       val path = image.get.saveToFile()
       val paths = List("original.jpg", "thumbnail.jpg").map(path + _)
-      println(paths.head.substring(paths.head.indexOf(title) + title.length + 1))
 
-      if (!DEBUG)
-        paths.foreach(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
-      val article = bot.getArticle(title)
+      try {
+        if (!DEBUG)
+          paths.foreach(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
+        val article = bot.getArticle(title)
 
-      val originalPath = paths.head.substring(paths.head.lastIndexOf("/") + 1)
-      val thumbnailPath = paths(1).substring(paths(1).lastIndexOf("/") + 1)
-      val snippet = clearString(image.get.snippet)
+        val originalPath = paths.head.substring(paths.head.lastIndexOf("/") + 1)
+        val thumbnailPath = paths(1).substring(paths(1).lastIndexOf("/") + 1)
+        val snippet = clearString(image.get.snippet)
 
-      val wikiFile =
-        s"""[[File:$originalPath|thumb=$thumbnailPath|alt=Alt|$snippet]]\n\n"""
-      article.setText(wikiFile + article.getText)
-      if (!DEBUG)
-        article.save()
+        val wikiFile =
+          s"""[[File:$originalPath|thumb=$thumbnailPath|alt=Alt|$snippet]]\n\n"""
 
-      val wikiImage = new WikiImage(snippet, image.get.link, originalPath, thumbnailPath)
+        if (!article.getText.contains(wikiFile)) {
+          article.setText(wikiFile + article.getText)
+          if (!DEBUG)
+            article.save()
 
-      this.copy(images = wikiImage :: this.images)
+          val wikiImage = new WikiImage(snippet, image.get.link, originalPath, thumbnailPath)
+          this.copy(images = wikiImage :: this.images)
+        } else {
+          this
+        }
+      } catch {
+        case e: Exception => this
+      }
     } else {
+      println("ERREUR")
       this
     }
   }
@@ -106,7 +114,7 @@ case class WikiPage(
        |      "editSummary": ${safeString(editSummary)},
        |      "pageType": ${safeString(pageType.toString)},
        |      "keywords" : ${listToString(keywords)},
-       |      "images" : ${if (images.isEmpty) "[]" else images.mkString(",")},
+       |      "images" : ${if (images.isEmpty) "[]" else "[" + images.mkString(",") + "]"},
        |      "ignored" : ${listToString(ignored)}
        |    }
     """.stripMargin

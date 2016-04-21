@@ -30,7 +30,7 @@ object JSONParser {
       json.getString("revisionId"),
       json.getString("editor"),
       json.getString("editSummary"),
-      PageType.withName(json.getString("type").toUpperCase),
+      PageType.withName(json.getString("pageType").toUpperCase),
       toList(json.getJSONArray("keywords")),
       images,
       toList(json.getJSONArray("ignored")))
