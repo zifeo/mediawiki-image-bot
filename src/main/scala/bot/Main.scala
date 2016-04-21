@@ -1,13 +1,24 @@
 package bot
 
-import bot.Tokenizer._
+import bot.IOUtils._
 import bot.Bot._
+
+import scala.util.Try
 
 object Main extends App {
 
-  //login()
+  login()
 
-  println(IOUtils.parseRequest("Tour de France").mkString("\n"))
+  var botPage = BotPage.getPageFromArticle(bot)
+      .withTotalPages()
+    .withPages(allLiteralPages.take(5)
+      .map(t => new WikiPage(bot.getArticle(t))
+        .withKeywords()
+        .withImages())
+    )
+
+  println(botPage)
+
 
   println("Done")
 
