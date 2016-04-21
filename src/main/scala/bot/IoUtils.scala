@@ -12,14 +12,11 @@ object IOUtils {
 
   private var idx = 0
   private val KEYS = Array(
-    "AIzaSyBwHV-De4PF9HgaVNeAvXqtSeLj2Nyg0fk",
-    "AIzaSyDDbWrVetwzu0_dI1VTwGooa9Gy3ISwR4o",
-    "AIzaSyDY18lHtBRspOGnZBEYHN_QzzEcWfD5pK4",
-    "AIzaSyBan1-iph_HqwqIglN1lRiloDX9-qVNPLU",
-    "AIzaSyAbpvmJxFlaVnlgfd5Qhc-L4JwWp9UJsw0",
-    "AIzaSyCpYumpxDKjErEkjlHOxh6OpSduPCM8JV4",
-    "AIzaSyCq2N3-Y7mC4VuqUhrx8OX60unB14InE-g",
-    "AIzaSyA3RX2RWCpjbgyjEXaiJ47NK8SI-VcQ-dE")
+    "AIzaSyDvvvn7ihyrkvSrerE575kvfw97p0kgffs",
+    "AIzaSyCSIvRR_G_a-fzpZwQFAeR-KYMl8lwgOL8",
+    "AIzaSyCIAaiS51jsjtC2eOVBRwuZgZbtl-YIlRI",
+    "AIzaSyBm_GVrG597WxnCvu1hEROqHFaG0ft5bVk"
+  )
 
   private val BASE_URL_1 = "https://www.googleapis.com/customsearch/v1?q="
   private val BASE_URL_2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
@@ -43,13 +40,21 @@ object IOUtils {
       } catch {
         case _: Exception =>
       }
-      val items = obj.getJSONArray("items")
-      Stream.range(0, obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("count"))
-        .map(i => items.getJSONObject(i)).map(j => new Image(page, j.getString("link"), j.getString("snippet")))
-        .toList
+      if (obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("totalResults") > 0) {
+        val items = obj.getJSONArray("items")
+        Stream.range(0, obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("count"))
+          .map(i => items.getJSONObject(i)).map(j => new Image(page, j.getString("link"), j.getString("snippet")))
+          .toList
+      } else
+        List()
     }
     catch {
-      case e: Exception => List()
+      case e: Exception => if (idx < KEYS.length) {
+        println(BASE_URL_1 + page.replaceAll(" ", "+") + BASE_URL_2 + KEYS(idx))
+        e.printStackTrace()
+        idx += 1
+        parseRequest(page)
+      } else List()
     }
   }
 
