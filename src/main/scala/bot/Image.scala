@@ -4,7 +4,7 @@ import bot.IOUtils._
 
 class Image(val page: String, val link: String, val snippet: String) {
 
-  private val BASE_PATH = "download1/"
+  private val BASE_PATH = "download/"
   private val ORIG_SIZE = 640
   private val THUMB_SIZE = 222
 

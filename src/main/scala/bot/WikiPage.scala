@@ -72,7 +72,8 @@ case class WikiPage(
       val paths = List("original.jpg", "thumbnail.jpg").map(path + _)
       println(paths.head.substring(paths.head.indexOf(title) + title.length + 1))
 
-      paths.foreach(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
+      if (!DEBUG)
+        paths.foreach(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
       val article = bot.getArticle(title)
 
       val originalPath = paths.head.substring(paths.head.lastIndexOf("/") + 1)
@@ -82,7 +83,8 @@ case class WikiPage(
       val wikiFile =
         s"""[[File:$originalPath|thumb=$thumbnailPath|alt=Alt|$snippet]]\n\n"""
       article.setText(wikiFile + article.getText)
-      article.save()
+      if (!DEBUG)
+        article.save()
 
       val wikiImage = new WikiImage(snippet, image.get.link, originalPath, thumbnailPath)
 
@@ -103,20 +105,18 @@ case class WikiPage(
        |      "editor": ${safeString(editor)},
        |      "editSummary": ${safeString(editSummary)},
        |      "pageType": ${safeString(pageType.toString)},
-       |      "keywords" : [
-       |${listToString(keywords)}
-       |  ],
-       |      "images" : [
-       |${images.mkString(",\n")}
-       |  ],
-       |     "ignored" : [
-       |${listToString(ignored)}
-       |  ]
-       |}
+       |      "keywords" : ${listToString(keywords)},
+       |      "images" : ${if (images.isEmpty) "[]" else images.mkString(",")},
+       |      "ignored" : ${listToString(ignored)}
+       |    }
     """.stripMargin
   }
 
-  private def listToString(raw: List[String]) = raw.map("\t\t\t" + safeString(_)).mkString(", \n")
+  private def listToString(raw: List[String]) =
+    if (raw.isEmpty)
+      "[]"
+    else
+      "[\n" + raw.map("\t\t\t" + safeString(_)).mkString(", \n") + "]"
 
 }
 

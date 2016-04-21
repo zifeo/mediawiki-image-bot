@@ -56,9 +56,7 @@ case class BotPage(
        | "timestamp" : $timestamp,
        | "revisionId" : ${safeString(revisionId)},
        | "totalPages" : $totalPages,
-       | "pages" : [
-       |${pages.mkString(", \n")}
-       |  ]
+       | "pages" : [${pages.mkString(",")}  ]
        |}
     """.stripMargin
   }
