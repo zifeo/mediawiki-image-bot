@@ -51,7 +51,6 @@ class BotPage(
   }
 
   override def toString: String = {
-    pages = new WikiPage("", 0, 0, "", "", PageType.ARTICLE, List(), List(), List()) :: pages
     ("{\n" +
       "\t\"name\" : \"%s\",\n" +
       "\t\"editor\" : \"%s\",\n" +

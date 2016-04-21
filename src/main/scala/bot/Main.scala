@@ -5,11 +5,9 @@ import bot.Bot._
 
 object Main extends App {
 
-  login()
+  //login()
 
-  //val p = IOUtils.parseRequest("Tour de France").saveToFile()
-
-  //List("original.jpg", "thumbnail.jpg").map(x => p + x).map(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
+  println(IOUtils.parseRequest("Tour de France").mkString("\n"))
 
   println("Done")
 

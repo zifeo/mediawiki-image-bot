@@ -1,6 +1,12 @@
 package bot
 
+import java.util.Calendar
+
 import bot.PageType.PageType
+import net.sourceforge.jwbf.mediawiki.actions.editing.FileUpload
+import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
+import bot.Bot._
+import net.sourceforge.jwbf.core.contentRep.Article
 
 object WikiPage {
 
@@ -23,22 +29,50 @@ object WikiPage {
 
 class WikiPage(
                 val title: String,
-                val timestamp: Int,
-                val revisionId: Int,
+                val timestamp: Long,
+                val revisionId: String,
                 val editor: String,
                 val editSummary: String,
                 val pageType: PageType,
-                val keywords: List[String],
+                var keywords: List[String],
                 val images: List[WikiImage],
                 val ignored: List[String]) {
 
+  def this(article: Article) {
+    this(
+      article.getTitle,
+      Calendar.getInstance().getTimeInMillis,
+      article.getRevisionId,
+      article.getEditor,
+      article.getEditSummary,
+      WikiPage.getTypeOfArticle(article.getTitle),
+      List(), List(), List()
+    )
+  }
+
   def isMaxImageReached = ignored.length > 5
+
+  def updateKeywords() = {
+    keywords = (keywords ::: Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct
+  }
+
+  def updateImage() = {
+    val images = IOUtils.parseRequest(title)
+
+    val image = images.find(img => !ignored.contains(img.link) &&
+      !images.map(w => w.link).contains(img.link))
+
+    if (image.isDefined) {
+      val path = image.get.saveToFile()
+      List("original.jpg", "thumbnail.jpg").map(path + _).map(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
+    }
+  }
 
   override def toString: String = {
     ("\t\t{\n" +
       "\t\t\t\"title\" : \"%s\",\n" +
       "\t\t\t\"timestamp\" : %d,\n" +
-      "\t\t\t\"revisionId\" : %d,\n" +
+      "\t\t\t\"revisionId\" : \"%s\",\n" +
       "\t\t\t\"editor\" : \"%s\",\n" +
       "\t\t\t\"editSummary\" : \"%s\",\n" +
       "\t\t\t\"pageType\" : \"%s\",\n" +
