@@ -1,7 +1,7 @@
 package bot
 
 import java.util.Calendar
-
+import bot.IOUtils._
 import bot.PageType.PageType
 import net.sourceforge.jwbf.mediawiki.actions.editing.FileUpload
 import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
@@ -27,16 +27,16 @@ object WikiPage {
 
 }
 
-class WikiPage(
-                val title: String,
-                val timestamp: Long,
-                val revisionId: String,
-                val editor: String,
-                val editSummary: String,
-                val pageType: PageType,
-                var keywords: List[String],
-                val images: List[WikiImage],
-                val ignored: List[String]) {
+case class WikiPage(
+                     title: String,
+                     timestamp: Long,
+                     revisionId: String,
+                     editor: String,
+                     editSummary: String,
+                     pageType: PageType,
+                     keywords: List[String],
+                     images: List[WikiImage],
+                     ignored: List[String]) {
 
   def this(article: Article) {
     this(
@@ -52,42 +52,71 @@ class WikiPage(
 
   def isMaxImageReached = ignored.length > 5
 
-  def updateKeywords() = {
-    keywords = (keywords ::: Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct
+  def withKeywords() = {
+    this.copy(keywords = (keywords ++ Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct)
   }
 
-  def updateImage() = {
+  def withIgnored(url: String) = {
+    this.copy(ignored = url :: ignored, images = images.filter(i => i.url != url))
+  }
+
+  def withImages() = {
     val images = IOUtils.parseRequest(title)
 
-    val image = images.find(img => !ignored.contains(img.link) &&
-      !images.map(w => w.link).contains(img.link))
+    val image = images.find(img => !ignored.contains(img.link))
+
+    println(title)
 
     if (image.isDefined) {
       val path = image.get.saveToFile()
-      List("original.jpg", "thumbnail.jpg").map(path + _).map(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
+      val paths = List("original.jpg", "thumbnail.jpg").map(path + _)
+      println(paths.head.substring(paths.head.indexOf(title) + title.length + 1))
+
+      paths.foreach(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
+      val article = bot.getArticle(title)
+
+      val originalPath = paths.head.substring(paths.head.lastIndexOf("/") + 1)
+      val thumbnailPath = paths(1).substring(paths(1).lastIndexOf("/") + 1)
+      val snippet = clearString(image.get.snippet)
+
+      val wikiFile =
+        s"""[[File:$originalPath|thumb=$thumbnailPath|alt=Alt|$snippet]]\n\n"""
+      article.setText(wikiFile + article.getText)
+      article.save()
+
+      val wikiImage = new WikiImage(snippet, image.get.link, originalPath, thumbnailPath)
+
+      this.copy(images = wikiImage :: this.images)
+    } else {
+      this
     }
   }
 
+  private def clearString(raw: String): String = raw.replaceAll(".jpg", "").replaceAll(".png", "").replaceAll(".gif", "").replaceAll("fichier:", "").replaceAll("Fichier:", "").replaceAll("file:", "").replaceAll("File:", "")
+
   override def toString: String = {
-    ("\t\t{\n" +
-      "\t\t\t\"title\" : \"%s\",\n" +
-      "\t\t\t\"timestamp\" : %d,\n" +
-      "\t\t\t\"revisionId\" : \"%s\",\n" +
-      "\t\t\t\"editor\" : \"%s\",\n" +
-      "\t\t\t\"editSummary\" : \"%s\",\n" +
-      "\t\t\t\"pageType\" : \"%s\",\n" +
-      "\t\t\t\"keywords\" : [\n%s\n" +
-      "\t\t\t],\n" +
-      "\t\t\t\"images\" : [\n%s\n" +
-      "\t\t\t],\n" +
-      "\t\t\t\"ignored\" : [\n%s\n" +
-      "\t\t\t]\n" +
-      "\t\t}\n"
-      ).
-      format(title, timestamp, revisionId, editor, editSummary, pageType.toString, listToString(keywords), images.mkString(",\n"), listToString(ignored))
+    s"""
+       |    {
+       |      "title": ${safeString(title)},
+       |      "timestamp": $timestamp,
+       |      "revisionId": ${safeString(revisionId)},
+       |      "editor": ${safeString(editor)},
+       |      "editSummary": ${safeString(editSummary)},
+       |      "pageType": ${safeString(pageType.toString)},
+       |      "keywords" : [
+       |${listToString(keywords)}
+       |  ],
+       |      "images" : [
+       |${images.mkString(",\n")}
+       |  ],
+       |     "ignored" : [
+       |${listToString(ignored)}
+       |  ]
+       |}
+    """.stripMargin
   }
 
-  private def listToString[T](raw: List[T]) = raw.map(x => "\t\t\t\t\"" + x + "\"").mkString(", \n")
+  private def listToString(raw: List[String]) = raw.map("\t\t\t" + safeString(_)).mkString(", \n")
 
 }
 

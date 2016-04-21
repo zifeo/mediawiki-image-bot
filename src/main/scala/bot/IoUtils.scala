@@ -88,4 +88,6 @@ object IOUtils {
     }
   }
 
+  def safeString(raw: String) = "\"" + raw.replaceAll("\"", "\\\\\"") + "\""
+
 }

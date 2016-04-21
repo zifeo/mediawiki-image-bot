@@ -10,7 +10,7 @@ class Image(val page: String, val link: String, val snippet: String) {
 
   def saveToFile(): String = {
     if (link != null && !link.isEmpty) {
-      val path = BASE_PATH + page + "/" + snippet.toLowerCase.replaceAll(" ", "_") + "_"
+      val path = BASE_PATH + page + "/" + snippet.toLowerCase.replaceAll(" ", "_").replaceAll(".jpg", "").replaceAll("file:", "") + "_"
       val fileName = path + "original.jpg"
       downloadImageFromURL(link, BASE_PATH + page + "/", fileName)
       resize(fileName, fileName, ORIG_SIZE)
@@ -22,6 +22,6 @@ class Image(val page: String, val link: String, val snippet: String) {
   }
 
   override def toString: String = {
-    String.format("Snippet : %s\nLink : %s", snippet, link)
+    "Snippet : %s\nLink : %s".format(snippet, link)
   }
 }
