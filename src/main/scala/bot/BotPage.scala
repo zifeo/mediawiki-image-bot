@@ -16,7 +16,7 @@ object BotPage {
   def updateImages(idx: Int) = {
     val botPage = BotPage.getPageFromArticle(bot)
       .withTotalPages()
-      .withPages(allLiteralPages.slice(idx, idx + 25)
+      .withPages(allPages.slice(idx, idx + 25)
         .map(t => new WikiPage(bot.getArticle(t))
           .withKeywords()
           .withImages())
@@ -57,6 +57,7 @@ case class BotPage(
                   ) {
 
   def savePage(): Unit = {
+    println("\t\t\tSAVE PAGE")
     val article = bot.getArticle(BotPage.NAME)
     val text = article.getText
     val startIdx = text.indexOf(BotPage.START_CACHE)
@@ -73,7 +74,7 @@ case class BotPage(
     }
   }
 
-  def withPages(pages: List[WikiPage]) = this.copy(pages = (pages ::: this.pages).sortWith((w1, w2) => w1.title <= w2.title))
+  def withPages(pages: List[WikiPage]) = this.copy(pages = pages ::: this.pages)
 
   def withTotalPages() = this.copy(totalPages = allPages.length)
 
@@ -93,7 +94,7 @@ case class BotPage(
        | "timestamp" : $timestamp,
        | "revisionId" : ${safeString(revisionId)},
        | "totalPages" : $totalPages,
-       | "pages" : [${pages.mkString(",")}  ]
+       | "pages" : [${pages.sortBy(_.title).mkString(",")}  ]
        |}
     """.stripMargin
   }
