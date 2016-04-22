@@ -22,4 +22,20 @@ object Bot {
     })
   }
 
+  private val REMOVE_FILE_REGEX = "\\[\\[File:(.+)\\|thumb=(.+?)\\|(.+)\\]\\]"
+
+  def removeFileFromArticle(title: String) {
+    println(title)
+    val article = bot.getArticle(title)
+    val txt = article.getText
+    if (txt.contains("[[File")) {
+      try {
+        article.setText(txt.replaceAll(REMOVE_FILE_REGEX, "").trim)
+        article.save()
+      } catch {
+        case e: Exception => e.printStackTrace()
+      }
+    }
+  }
+
 }
