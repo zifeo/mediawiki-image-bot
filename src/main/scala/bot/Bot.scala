@@ -11,7 +11,9 @@ object Bot {
 
   val bot = new MediaWikiBot(config.getString("mediawiki"))
 
-  val allPages = new AllPageTitles(bot).iterator().asScala.toList
+  val blacklist = config.getList("blacklist")
+
+  val allPages = new AllPageTitles(bot).iterator().asScala.toList.filter(p => !blacklist.contains(p))
   val allLiteralPages = allPages.filter(p => Regex.atLeastOneChar.findFirstIn(p).isDefined)
 
   def login() = bot.login(config.getString("login"), config.getString("password"))
