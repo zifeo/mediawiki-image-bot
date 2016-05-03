@@ -36,10 +36,11 @@ object JSONParser {
       toList(json.getJSONArray("ignored")))
   }
 
-  private def parseImage(raw: JSONObject): WikiImage = {
+  private def parseImage(raw: JSONObject): WikiImage =
     new WikiImage(raw.getString("snippet"), raw.getString("url"), raw.getString("thumbnail"), raw.getString("filename"))
-  }
 
-  private def toList(array: JSONArray): List[String] = Stream.range(0, array.length()).map(i => array.getString(i)).toList
+
+  private def toList(array: JSONArray): List[String] =
+    Stream.range(0, array.length()).map(i => array.getString(i)).toList
 
 }

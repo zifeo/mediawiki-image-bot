@@ -5,7 +5,7 @@ import BotPage.updateImages
 
 object Main extends App {
 
-  login()
+  //login()
 
   //allPages.slice(525, 550).foreach(removeFileFromArticle(_))
 

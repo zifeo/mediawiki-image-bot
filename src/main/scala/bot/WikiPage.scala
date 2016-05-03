@@ -8,24 +8,6 @@ import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
 import bot.Bot._
 import net.sourceforge.jwbf.core.contentRep.Article
 
-object WikiPage {
-
-  private val DATE_YEAR_REGEX = "\\d{0,4}".r
-  private val DATE_COMPLETE_REGEX = "\\d{0,4}\\.(?:\\d|\\*){0,2}.(?:\\d|\\*){0,2}".r
-  private val DATE_INTERVAL_REGEX = "\\d{0,4}(?:-\\d{0,4})?\\.\\d{0,2}(?:-\\d{0,2})?\\.\\d{0,2}(?:-\\d{0,2})?".r
-  private val LOCATION_REGEX = "\\d{15,}".r
-  private val DATE_UNCONVERTIBLE_REGEX = "-.*".r
-  private val WORD_REGEX = "[^#+*/=&%_$£!<>§°\"/`:;]+".r
-
-  def getTypeOfArticle(title: String): PageType = title match {
-    case DATE_YEAR_REGEX() | DATE_COMPLETE_REGEX() | DATE_INTERVAL_REGEX() => PageType.DATE
-    case LOCATION_REGEX() => PageType.LOCATION
-    case DATE_UNCONVERTIBLE_REGEX() => PageType.NONE
-    case WORD_REGEX() => PageType.ARTICLE
-    case _ => PageType.NONE
-  }
-
-}
 
 case class WikiPage(
                      title: String,
@@ -50,9 +32,9 @@ case class WikiPage(
     )
   }
 
-  def isMaxImageReached = ignored.length > 5
+  def isMaxImageReached: Boolean = ignored.length > 5
 
-  def withKeywords() = {
+  def withKeywords: WikiPage = {
     this.copy(keywords = (keywords ++ Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct)
   }
 
@@ -106,17 +88,17 @@ case class WikiPage(
 
   override def toString: String = {
     s"""
-       |    {
-       |      "title": ${safeString(title)},
-       |      "timestamp": $timestamp,
-       |      "revisionId": ${safeString(revisionId)},
-       |      "editor": ${safeString(editor)},
-       |      "editSummary": ${safeString(editSummary)},
-       |      "pageType": ${safeString(pageType.toString)},
-       |      "keywords" : ${listToString(keywords)},
-       |      "images" : ${if (images.isEmpty) "[]" else "[" + images.mkString(",") + "]"},
-       |      "ignored" : ${listToString(ignored)}
-       |    }
+       |{
+       |  "title": ${safeString(title)},
+       |  "timestamp": $timestamp,
+       |  "revisionId": ${safeString(revisionId)},
+       |  "editor": ${safeString(editor)},
+       |  "editSummary": ${safeString(editSummary)},
+       |  "pageType": ${safeString(pageType.toString)},
+       |  "keywords" : ${listToString(keywords)},
+       |  "images" : ${if (images.isEmpty) "[]" else "[" + images.mkString(",") + "]"},
+       |  "ignored" : ${listToString(ignored)}
+       |}
     """.stripMargin
   }
 
@@ -128,12 +110,21 @@ case class WikiPage(
 
 }
 
+object WikiPage {
 
-object PageType extends Enumeration {
-  type PageType = Value
-  val NONE = Value("NONE")
-  val ARTICLE = Value("ARTICLE")
-  val DATE = Value("DATE")
-  val LOCATION = Value("LOCATION")
-  val USER = Value("UTILISATEUR")
+  private val DATE_YEAR_REGEX = "\\d{0,4}".r
+  private val DATE_COMPLETE_REGEX = "\\d{0,4}\\.(?:\\d|\\*){0,2}.(?:\\d|\\*){0,2}".r
+  private val DATE_INTERVAL_REGEX = "\\d{0,4}(?:-\\d{0,4})?\\.\\d{0,2}(?:-\\d{0,2})?\\.\\d{0,2}(?:-\\d{0,2})?".r
+  private val LOCATION_REGEX = "\\d{15,}".r
+  private val DATE_UNCONVERTIBLE_REGEX = "-.*".r
+  private val WORD_REGEX = "[^#+*/=&%_$£!<>§°\"/`:;]+".r
+
+  def getTypeOfArticle(title: String): PageType = title match {
+    case DATE_YEAR_REGEX() | DATE_COMPLETE_REGEX() | DATE_INTERVAL_REGEX() => PageType.DATE
+    case LOCATION_REGEX() => PageType.LOCATION
+    case DATE_UNCONVERTIBLE_REGEX() => PageType.NONE
+    case WORD_REGEX() => PageType.ARTICLE
+    case _ => PageType.NONE
+  }
+
 }
