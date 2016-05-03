@@ -3,28 +3,14 @@ package bot
 import java.io._
 import java.net.{HttpURLConnection, URL}
 
-import net.coobird.thumbnailator.Thumbnails
-import org.json.JSONObject
+import spray.json._
 
 import scala.io.Source
 
 object IOUtils {
 
   private var idx = 0
-  private val KEYS = Array(
-    "AIzaSyDvvvn7ihyrkvSrerE575kvfw97p0kgffs",
-    "AIzaSyCSIvRR_G_a-fzpZwQFAeR-KYMl8lwgOL8",
-    "AIzaSyCIAaiS51jsjtC2eOVBRwuZgZbtl-YIlRI",
-    "AIzaSyBm_GVrG597WxnCvu1hEROqHFaG0ft5bVk",
-    "AIzaSyDDbWrVetwzu0_dI1VTwGooa9Gy3ISwR4o",
-    "AIzaSyCq2N3-Y7mC4VuqUhrx8OX60unB14InE-g",
-    "AIzaSyA3RX2RWCpjbgyjEXaiJ47NK8SI-VcQ-dE",
-    "AIzaSyBwHV-De4PF9HgaVNeAvXqtSeLj2Nyg0fk",
-    "AIzaSyDY18lHtBRspOGnZBEYHN_QzzEcWfD5pK4",
-    "AIzaSyBan1-iph_HqwqIglN1lRiloDX9-qVNPLU",
-    "AIzaSyAbpvmJxFlaVnlgfd5Qhc-L4JwWp9UJsw0",
-    "AIzaSyCpYumpxDKjErEkjlHOxh6OpSduPCM8JV4"
-  )
+  private val KEYS = config.getList("google.keys")
 
   private val BASE_URL_1 = "https://www.googleapis.com/customsearch/v1?q="
   private val BASE_URL_2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
@@ -39,7 +25,7 @@ object IOUtils {
         idx += 1
         content = googleRequest(page)
       }
-      var obj = new JSONObject(content)
+      var obj = content.parseJson
       try {
         if (obj.getJSONObject("error").getString("code") == "403") {
           idx += 1
