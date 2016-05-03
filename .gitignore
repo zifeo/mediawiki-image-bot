@@ -1,6 +1,8 @@
 
 # Created by https://www.gitignore.io/api/ensime,linux,osx,scala,sbt,intellij
 
+.download/
+
 ### Ensime ###
 # Ensime specific
 .ensime
