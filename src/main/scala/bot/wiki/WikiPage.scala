@@ -22,7 +22,8 @@ case class WikiPage(
                      pageType: PageType,
                      keywords: List[String],
                      images: List[WikiImage],
-                     ignored: List[String]) {
+                     ignored: List[String]
+                   ) {
 
   def this(article: Article) {
     this(
@@ -32,7 +33,9 @@ case class WikiPage(
       article.getEditor,
       article.getEditSummary,
       WikiPage.getTypeOfArticle(article.getTitle),
-      List(), List(), List()
+      List(),
+      List(),
+      List()
     )
   }
 
@@ -42,11 +45,11 @@ case class WikiPage(
     this.copy(keywords = (keywords ++ Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct)
   }
 
-  def withIgnored(url: String) = {
+  def withIgnored(url: String): WikiPage = {
     this.copy(ignored = url :: ignored, images = images.filter(i => i.url != url))
   }
 
-  def withImages() = {
+  def withImages(): WikiPage = {
     val images = IO.parseRequest(title)
 
     val image = images.find(img => !ignored.contains(img.link))
@@ -58,7 +61,6 @@ case class WikiPage(
       val paths = List("original.jpg", "thumbnail.jpg").map(path + _)
 
       try {
-        if (!DEBUG)
           paths.foreach(p => bot.getPerformedAction(new FileUpload(new SimpleFile(p), bot)))
         val article = bot.getArticle(title)
 
@@ -71,7 +73,6 @@ case class WikiPage(
 
         if (!article.getText.contains(wikiFile)) {
           article.setText(wikiFile + article.getText)
-          if (!DEBUG)
             article.save()
 
           val wikiImage = new WikiImage(snippet, image.get.link, originalPath, thumbnailPath)

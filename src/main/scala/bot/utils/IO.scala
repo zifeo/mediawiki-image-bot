@@ -13,7 +13,7 @@ import scala.io.Source
 object IO {
 
   private var idx = 0
-  private val KEYS = config.getList("google.keys")
+  private val KEYS = config.getList("google.keys").toArray
 
   private val BASE_URL_1 = "https://www.googleapis.com/customsearch/v1?q="
   private val BASE_URL_2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
@@ -81,6 +81,7 @@ object IO {
     }
   }
 
+  // TODO : check
   def resize(from: String, to: String, size: Int) {
     try {
       val fileFrom = new File(from)
