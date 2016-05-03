@@ -1,5 +1,7 @@
-package bot
+package bot.utils
 
+import bot.BotPage
+import bot.wiki.{PageType, WikiImage, WikiPage}
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 import org.json.{JSONArray, JSONObject}
 

@@ -2,8 +2,10 @@ package bot
 
 import java.util.Calendar
 
-import bot.IOUtils._
-import bot.JSONParser.parseBotData
+import bot.utils.{JSONParser, IO}
+import IO._
+import JSONParser.parseBotData
+import bot.wiki.WikiPage
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 import bot.Bot._
 

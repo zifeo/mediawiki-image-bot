@@ -1,13 +1,11 @@
-package bot
+package bot.utils
 
+import bot.utils.Regex._
 import net.sourceforge.jwbf.core.contentRep.Article
 
 import scala.util.matching.Regex
 
 object Tokenizer {
-
-  private val hyperwordSelector = """\[\[([^\]]+)\]\]""".r
-  private val userSelector = """\[\[Utilisateur:([^\]]+)\]\]""".r
 
   def tokenizer(content: String, regex: Regex): List[String] =
     regex.findAllMatchIn(content).map(_.group(1).trim).toList

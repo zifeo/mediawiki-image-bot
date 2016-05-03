@@ -1,5 +1,7 @@
 package bot
 
+import bot.utils.Regex
+import bot.wiki.{PageType, WikiPage}
 import net.sourceforge.jwbf.mediawiki.actions.queries.AllPageTitles
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 
@@ -7,12 +9,10 @@ import scala.collection.JavaConverters._
 
 object Bot {
 
-  private val atLeastOneChar = """[a-zA-Z]""".r
-
   val bot = new MediaWikiBot(config.getString("mediawiki"))
 
   val allPages = new AllPageTitles(bot).iterator().asScala.toList
-  val allLiteralPages = allPages.filter(p => atLeastOneChar.findFirstIn(p).isDefined)
+  val allLiteralPages = allPages.filter(p => Regex.atLeastOneChar.findFirstIn(p).isDefined)
 
   def login() = bot.login(config.getString("login"), config.getString("password"))
 
