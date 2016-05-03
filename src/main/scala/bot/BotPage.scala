@@ -81,7 +81,7 @@ object BotPage {
               .withImages()
           }
       }
-    botPage.savePage()
+    botPage.savePage
   }
 
   def getPageFromArticle(bot: MediaWikiBot): BotPage = {
