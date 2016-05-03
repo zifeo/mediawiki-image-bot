@@ -30,4 +30,5 @@ class Image(val page: String, val link: String, val snippet: String) {
   override def toString: String = {
     "Snippet : %s\nLink : %s".format(snippet, link)
   }
+
 }

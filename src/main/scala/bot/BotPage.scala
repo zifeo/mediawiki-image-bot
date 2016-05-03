@@ -7,45 +7,6 @@ import bot.JSONParser.parseBotData
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 import bot.Bot._
 
-object BotPage {
-  val NAME = "ImageBot"
-
-  val START_CACHE = "<=====START==CACHE=====>"
-  val END_CACHE = "<=====END==CACHE=====>"
-
-  def updateImages(idx: Int) = {
-    val botPage = BotPage.getPageFromArticle(bot)
-      .withTotalPages()
-      .withPages(allPages.slice(idx, idx + 25)
-        .map(t => new WikiPage(bot.getArticle(t))
-          .withKeywords()
-          .withImages())
-      )
-    botPage.savePage()
-  }
-
-  def getPageFromArticle(bot: MediaWikiBot): BotPage = {
-    val article = bot.getArticle(NAME)
-    val text = article.getText
-    val startIdx = text.indexOf(START_CACHE)
-    if (startIdx > -1) {
-      val endIdx = text.indexOf(END_CACHE)
-      if (endIdx > startIdx) {
-        try {
-          parseBotData(bot, text.substring(startIdx + START_CACHE.length, endIdx).trim)
-        } catch {
-          case e: Exception => new BotPage(bot, NAME, article.getEditor, Calendar.getInstance().getTimeInMillis, article.getRevisionId, 0, List())
-        }
-      } else {
-        new BotPage(bot, NAME, article.getEditor, Calendar.getInstance().getTimeInMillis, article.getRevisionId, 0, List())
-      }
-    } else {
-      new BotPage(bot, NAME, article.getEditor, Calendar.getInstance().getTimeInMillis, article.getRevisionId, 0, List())
-    }
-  }
-
-}
-
 case class BotPage(
                     bot: MediaWikiBot,
                     name: String,
@@ -74,15 +35,14 @@ case class BotPage(
     }
   }
 
-  def withPages(pages: List[WikiPage]) = this.copy(pages = pages ::: this.pages)
+  def withPages(pages: List[WikiPage]): BotPage =
+    this.copy(pages = pages ::: this.pages)
 
-  def withTotalPages() = this.copy(totalPages = allPages.length)
+  def withTotalPages: BotPage =
+    this.copy(totalPages = allPages.length)
 
   def removeFileInArticles(exceptions: List[String]) = {
     val pages = this.pages.filter(p => !exceptions.contains(p.title))
-
-
-
     this.copy(pages = pages)
   }
 
@@ -97,6 +57,53 @@ case class BotPage(
        | "pages" : [${pages.sortBy(_.title).mkString(",")}  ]
        |}
     """.stripMargin
+  }
+
+}
+
+object BotPage {
+
+  val NAME = "ImageBot"
+
+  val START_CACHE = "<=====START==CACHE=====>"
+  val END_CACHE = "<=====END==CACHE=====>"
+
+  def updateImages(idx: Int) = {
+    val botPage = BotPage
+      .getPageFromArticle(bot)
+      .withTotalPages()
+      .withPages {
+        allPages
+          .slice(idx, idx + 25)
+          .map { t =>
+            new WikiPage(bot.getArticle(t))
+              .withKeywords()
+              .withImages()
+          }
+      }
+    botPage.savePage()
+  }
+
+  def getPageFromArticle(bot: MediaWikiBot): BotPage = {
+    val article = bot.getArticle(NAME)
+    val text = article.getText
+    val startIdx = text.indexOf(START_CACHE)
+
+    if (startIdx > -1) {
+      val endIdx = text.indexOf(END_CACHE)
+      if (endIdx > startIdx) {
+        try {
+          parseBotData(bot, text.substring(startIdx + START_CACHE.length, endIdx).trim)
+        } catch {
+          case e: Exception =>
+            new BotPage(bot, NAME, article.getEditor, Calendar.getInstance().getTimeInMillis, article.getRevisionId, 0, List())
+        }
+      } else {
+        new BotPage(bot, NAME, article.getEditor, Calendar.getInstance().getTimeInMillis, article.getRevisionId, 0, List())
+      }
+    } else {
+      new BotPage(bot, NAME, article.getEditor, Calendar.getInstance().getTimeInMillis, article.getRevisionId, 0, List())
+    }
   }
 
 }
