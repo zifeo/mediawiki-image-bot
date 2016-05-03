@@ -2,8 +2,8 @@ package bot
 
 import java.util.Calendar
 
-import bot.utils.{JSONParser, IO}
-import IO._
+import bot.utils.JSONParser
+import bot.utils.IO._
 import JSONParser.parseBotData
 import bot.wiki.WikiPage
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
@@ -43,7 +43,7 @@ case class BotPage(
   def withTotalPages: BotPage =
     this.copy(totalPages = allPages.length)
 
-  def removeFileInArticles(exceptions: List[String]) = {
+  def removeFileInArticles(exceptions: List[String]): BotPage = {
     val pages = this.pages.filter(p => !exceptions.contains(p.title))
     this.copy(pages = pages)
   }
@@ -70,20 +70,20 @@ object BotPage {
   val START_CACHE = "<=====START==CACHE=====>"
   val END_CACHE = "<=====END==CACHE=====>"
 
-  def updateImages(idx: Int) = {
+  def updateImages(idx: Int): Unit = {
     val botPage = BotPage
       .getPageFromArticle(bot)
-      .withTotalPages()
+      .withTotalPages
       .withPages {
         allPages
           .slice(idx, idx + 25)
           .map { t =>
             new WikiPage(bot.getArticle(t))
-              .withKeywords()
+              .withKeywords
               .withImages()
           }
       }
-    botPage.savePage
+    botPage.savePage()
   }
 
   def getPageFromArticle(bot: MediaWikiBot): BotPage = {
