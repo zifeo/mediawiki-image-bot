@@ -1,6 +1,7 @@
-package bot
+package bot.wiki
 
-import bot.IOUtils._
+import bot.utils.IO
+import IO._
 
 class WikiImage(
                  snippet: String,

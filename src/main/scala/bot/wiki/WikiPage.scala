@@ -1,12 +1,16 @@
-package bot
+package bot.wiki
 
 import java.util.Calendar
-import bot.IOUtils._
-import bot.PageType.PageType
-import net.sourceforge.jwbf.mediawiki.actions.editing.FileUpload
-import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
+
+import bot.utils.{IO, Tokenizer}
+import IO._
+import PageType.PageType
+import bot.utils.Tokenizer
+import bot.Bot
 import bot.Bot._
 import net.sourceforge.jwbf.core.contentRep.Article
+import net.sourceforge.jwbf.mediawiki.actions.editing.FileUpload
+import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
 
 
 case class WikiPage(
@@ -43,7 +47,7 @@ case class WikiPage(
   }
 
   def withImages() = {
-    val images = IOUtils.parseRequest(title)
+    val images = IO.parseRequest(title)
 
     val image = images.find(img => !ignored.contains(img.link))
 

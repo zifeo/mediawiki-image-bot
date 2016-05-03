@@ -1,4 +1,4 @@
-package bot
+package bot.wiki
 
 object PageType extends Enumeration {
   type PageType = Value

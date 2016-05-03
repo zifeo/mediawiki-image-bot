@@ -1,13 +1,16 @@
-package bot
+package bot.utils
 
 import java.io._
 import java.net.{HttpURLConnection, URL}
 
-import spray.json._
+import bot._
+import bot.wiki.Image
+import net.coobird.thumbnailator.Thumbnails
+import org.json.JSONObject
 
 import scala.io.Source
 
-object IOUtils {
+object IO {
 
   private var idx = 0
   private val KEYS = config.getList("google.keys")
@@ -25,8 +28,10 @@ object IOUtils {
         idx += 1
         content = googleRequest(page)
       }
-      var obj = content.parseJson
+      //content.parseJson.asJsObject
+      val obj = new JSONObject(content)
       try {
+        // obj.fields("error").asJsObject.fields("code").convertTo[String]
         if (obj.getJSONObject("error").getString("code") == "403") {
           idx += 1
           obj = new JSONObject(googleRequest(page))

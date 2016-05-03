@@ -18,6 +18,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "log4j-over-slf4j" % "1.7.21",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0",
   "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "2.4.4",
+  "org.json" % "json" % "20150729",
   "net.coobird" % "thumbnailator" % "0.4.8",
   "net.sourceforge" % "jwbf" % "3.1.0",
   "com.flickr4java" % "flickr4java" % "2.16",

@@ -1,8 +1,9 @@
-package bot
+package bot.wiki
 
 import java.io.File
 
-import bot.IOUtils._
+import bot.utils.IO
+import bot.utils.IO._
 
 class Image(val page: String, val link: String, val snippet: String) {
 
