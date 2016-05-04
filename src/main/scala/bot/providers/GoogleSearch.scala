@@ -1,100 +1,60 @@
 package bot.providers
 
 import java.io._
-import java.net.{HttpURLConnection, URL}
+import java.net.{URL, URLEncoder}
 
 import bot._
-import net.coobird.thumbnailator.Thumbnails
+import bot.wiki.WikiImage
+import spray.json._
 
+import scala.collection.JavaConverters._
 import scala.io.Source
 
 object GoogleSearch {
 
+  private val searchCount = 5
+
   private var keyIdx = 0
-  private val keys = config.getList("google.keys").toArray
+  private val keys = config.getStringList("google.keys").asScala.toArray
 
   private val apiUrl1 = "https://www.googleapis.com/customsearch/v1?q="
-  private val apiUrl2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
+  private val apiUrl2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num="
+  private val apiUrl3 = "&rights=cc_attribute&searchType=image&key="
 
-  private def googleRequest(link: String): String =
-    Source.fromURL(apiUrl1 + link.replaceAll(" ", "+") + apiUrl2 + keys(keyIdx)).mkString
+  def apply(terms: String): List[(WikiImage, File)] = {
+    log.info("Google searching for {}", terms)
+    val res = call(terms)
 
-  /*def parseRequest(page: String): List[Image] = {
-    try {
-      var content = googleRequest(page)
-      if (content.isEmpty) {
-        keyIdx += 1
-        content = googleRequest(page)
-      }
-      //content.parseJson.asJsObject
-      var obj = new JSONObject(content)
-      try {
-        // obj.fields("error").asJsObject.fields("code").convertTo[String]
-        if (obj.getJSONObject("error").getString("code") == "403") {
-          keyIdx += 1
-          obj = new JSONObject(googleRequest(page))
+    if (res.get("error").contains(JsString("403"))) {
+      keyIdx += 1
+      assert(keyIdx < keys.length, "no valid key found")
+      apply(terms)
+    } else {
+      res("queries")
+        .asJsObject
+        .fields
+        .get("items")
+        .flatMap(_.convertTo[List[JsObject]])
+        .toList
+        .map { json =>
+
+          val fields = json.fields
+          val title = fields("snippet").convertTo[String]
+          val link = fields("link").convertTo[String]
+          val file = tempFileFromStream(new URL(link).openStream())
+
+          log.debug("Found: {}", title)
+          WikiImage(title, None, link, List.empty, None, "cc") -> file
         }
-      } catch {
-        case _: Exception =>
-      }
-
-      if (obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("totalResults") > 0) {
-        val items = obj.getJSONArray("items")
-        Stream.range(0, obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("count"))
-          .map(i => items.getJSONObject(i)).map(j => new Image(page, j.getString("link"), j.getString("snippet")))
-          .toList
-      } else
-        List()
-
-    } catch {
-      case e: Exception =>
-        if (keyIdx < keys.length) {
-          println(apiUrl1 + page.replaceAll(" ", "+") + apiUrl2 + keys(keyIdx))
-          e.printStackTrace()
-          keyIdx += 1
-          parseRequest(page)
-        }
-        else
-          List()
     }
   }
 
-  def downloadImageFromURL(link: String, folder: String, name: String): Boolean = {
-    try {
-      var out: OutputStream = null
-      var in: InputStream = null
-
-      val url = new URL(link)
-
-      val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-      in = connection.getInputStream
-      val file = new File(folder)
-      file.mkdirs
-      out = new BufferedOutputStream(new FileOutputStream(name))
-      val byteArray = Stream.continually(in.read).takeWhile(_ != -1).map(_.toByte).toArray
-
-      out.write(byteArray)
-      in.close()
-      out.close()
-      true
-    }
-    catch {
-      case e: Exception => false
-    }
-  }
-
-  // TODO : check
-  def resize(from: String, to: String, size: Int) {
-    try {
-      val fileFrom = new File(from)
-      val fileTo = new File(to)
-      Thumbnails.of(fileFrom).size(size, size).outputFormat("jpg").toFile(fileTo)
-    }
-    catch {
-      case e: Exception =>
-    }
-  }
-
-  def safeString(raw: String) = "\"" + raw.replaceAll("\"", "\\\\\"") + "\""*/
+  private def call(query: String): Map[String, JsValue] =
+    Source
+      .fromURL(apiUrl1 + URLEncoder.encode(query, "UTF-8") + apiUrl2 + searchCount + apiUrl3 + keys(keyIdx))
+      .mkString
+      .parseJson
+      .asJsObject
+      .fields
 
 }

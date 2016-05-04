@@ -11,6 +11,7 @@ import scala.collection.JavaConverters._
 
 object FlickrSearch {
 
+  private val searchCount = 5
   private val flickr = new Flickr(config.getString("flickr.key"), config.getString("flickr.secret"), new REST)
 
   // http://creativecommons.org/licenses/x
@@ -24,6 +25,8 @@ object FlickrSearch {
   )
 
   def apply(terms: String): List[(WikiImage, File)] = {
+    log.info("Flickr searching for {}", terms)
+
     val params = new SearchParameters
     params.setText(terms)
     params.setLicense(licenses.keys.mkString(","))
@@ -33,23 +36,24 @@ object FlickrSearch {
 
     flickr
       .getPhotosInterface
-      .search(params, 5, 1)
+      .search(params, searchCount, 1)
       .asScala
       .toList
       .map { res =>
         val photo = flickr.getPhotosInterface.getInfo(res.getId, null)
 
         val title = photo.getTitle
-        val description = Option(photo.getDescription).map(d => s" · $d").getOrElse("")
-        val author =
+        val description = Option(photo.getDescription)
+        val author = Some(
           if (Option(photo.getOwner.getRealName).getOrElse("").nonEmpty) photo.getOwner.getRealName
           else photo.getOwner.getUsername
-
+        )
         val license = licenses(photo.getLicense.toInt)
         val tags = photo.getTags.asScala.toList.map(_.getValue)
         val file = tempFileFromStream(flickr.getPhotosInterface.getImageAsStream(photo, Size.MEDIUM))
 
-        WikiImage("", author, photo.getUrl, tags, s"$title$description", license) -> file
+        log.debug("Found: {}", title)
+        WikiImage(title, author, photo.getUrl, tags, description, license) -> file
       }
   }
 

@@ -7,6 +7,6 @@ object StateETL extends BotApp {
   println(bot.state)
 
   bot.signIn()
-  bot.saveState()
+  bot.save()
 
 }
