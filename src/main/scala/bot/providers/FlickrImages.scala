@@ -47,7 +47,7 @@ object FlickrImages {
     params.setLicense(licenses.keys.mkString(","))
     params.setMedia("photos")
     params.setSort(SearchParameters.INTERESTINGNESS_DESC)
-    params.setSafeSearch(FlickrImages.SAFETYLEVEL_SAFE)
+    params.setSafeSearch(Flickr.SAFETYLEVEL_SAFE)
     flickr.getPhotosInterface.search(params, 5, 1).asScala.toList
   }
 

@@ -1,16 +1,19 @@
 package bot
 
-import bot.wiki.WikiPage
+import bot.wiki.{BotState, WikiPage}
 import net.sourceforge.jwbf.mediawiki.actions.queries.AllPageTitles
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 
 import scala.collection.JavaConverters._
 
-final class Bot(url: String, login: String, pass: String, blacklist: List[String]) {
+final class Bot(val url: String, val login: String, pass: String, val pageBot: String, val blacklist: Set[String]) {
 
-  private lazy val bot = new MediaWikiBot(url)
+  private val bot = new MediaWikiBot(url)
+  private var state = BotState.parse(bot.getArticle(pageBot))
 
-  lazy val allPageTitles = new AllPageTitles(bot).iterator().asScala.toStream
+  lazy val allRawPageTitles = new AllPageTitles(bot).iterator().asScala.toStream
+
+  lazy val allPageTitles = allRawPageTitles.filter(!blacklist.contains(_))
 
   lazy val allWikiPages = allPageTitles.map { title =>
     log.debug("Loading {}", title)
@@ -22,23 +25,15 @@ final class Bot(url: String, login: String, pass: String, blacklist: List[String
   def signIn(): Unit =
     bot.login(login, pass)
 
+  def saveState(): Unit =
+    state.save(bot)
 
 
+}
 
-  private val REMOVE_FILE_REGEX = "\\[\\[File:(.+)\\|thumb=(.+?)\\|(.+)\\]\\]"
+object Bot {
 
-  def removeFileFromArticle(title: String) {
-    println(title)
-    val article = bot.getArticle(title)
-    val txt = article.getText
-    if (txt.contains("[[File")) {
-      try {
-        article.setText(txt.replaceAll(REMOVE_FILE_REGEX, "").trim)
-        article.save()
-      } catch {
-        case e: Exception => e.printStackTrace()
-      }
-    }
-  }
+  val startCacheTag = "<=====START==CACHE=====>"
+  val endCacheTag = "<=====END==CACHE=====>"
 
 }

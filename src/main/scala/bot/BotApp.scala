@@ -10,7 +10,8 @@ trait BotApp extends App {
     config.getString("mediawiki"),
     config.getString("login"),
     config.getString("password"),
-    config.getStringList("blacklist").asScala.toList
+    config.getString("botPage"),
+    config.getStringList("blacklist").asScala.toSet
   )
 
 }

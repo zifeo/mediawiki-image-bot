@@ -1,25 +1,14 @@
 package bot.wiki
 
-import bot.providers.GoogleImages
-import GoogleImages._
-import bot.providers.GoogleImages
+import spray.json._
+import bot._
 
-class WikiImage(
-                 snippet: String,
-                 url: String,
-                 thumbnail: String,
-                 filename: String
-               ) {
-
-  override def toString: String = {
-    s"""
-       |{
-       |  "url": ${safeString(url)},
-       |  "snippet": ${safeString(snippet)},
-       |  "thumbnail": ${safeString(thumbnail)},
-       |  "filename": ${safeString(filename)}
-       |}
-    """.stripMargin
-  }
+case class WikiImage(
+                      url: String,
+                      description: String,
+                      license: String,
+                      filename: String,
+                      discarded: Boolean = false
+                    ) {
 
 }
