@@ -120,7 +120,7 @@ object WikiPage {
   private val DATE_INTERVAL_REGEX = "\\d{0,4}(?:-\\d{0,4})?\\.\\d{0,2}(?:-\\d{0,2})?\\.\\d{0,2}(?:-\\d{0,2})?".r
   private val LOCATION_REGEX = "\\d{15,}".r
   private val DATE_UNCONVERTIBLE_REGEX = "-.*".r
-  private val WORD_REGEX = """[^#+*/=&%_$£!<>§°\\"/`:;]+""".r
+  private val WORD_REGEX = "[^#+*/=&%_$£!<>§°\"/`:;]+".r
 
   val blacklist = config.getStringList("blacklist").asScala.toSet
 
