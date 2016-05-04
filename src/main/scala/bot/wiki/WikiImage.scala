@@ -1,8 +1,5 @@
 package bot.wiki
 
-import spray.json._
-import bot._
-
 case class WikiImage(
                       url: String,
                       description: String,
