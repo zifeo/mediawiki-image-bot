@@ -3,15 +3,13 @@ package bot.wiki
 import bot.utils.Classifier
 import bot.wiki.PageType.PageType
 import net.sourceforge.jwbf.core.contentRep.Article
-import spray.json._
-import bot._
 
 case class WikiPage(
-                      title: String,
-                      revisionId: String,
-                      pageType: PageType,
-                      images: List[WikiImage]
-                    ) {
+                     title: String,
+                     revisionId: String,
+                     pageType: PageType,
+                     images: List[WikiImage]
+                   ) {
 
   def this(article: Article) {
     this(

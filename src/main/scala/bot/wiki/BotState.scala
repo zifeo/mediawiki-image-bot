@@ -66,7 +66,7 @@ object BotState {
     if (-1 < startIdx && -1 < endIdx) {
       assert(startIdx < endIdx, "invalid bot cache")
       log.debug("Bot state found")
-      text.substring(startIdx, endIdx).parseJson.convertTo[BotState]
+      text.substring(startIdx + BotState.startCacheTag.length, endIdx).parseJson.convertTo[BotState]
     } else {
       log.debug("Bot state not found, creating empty one")
       BotState(article.getTitle, article.getRevisionId, List.empty)
