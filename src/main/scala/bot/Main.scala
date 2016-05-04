@@ -1,7 +1,6 @@
 package bot
 
-import bot.Bot._
-import BotPage.updateImages
+import bot.BotPage.updateImages
 
 object Main extends App {
 
@@ -12,13 +11,13 @@ object Main extends App {
   // This is needed to save the file every 25 uploads
   var i = 700
 
-  while (i < allPages.length) {
+  /*while (i < allPages.length) {
     updateImages(i)
     i += 25
   }
 
   BotPage.getPageFromArticle(bot).withTotalPages().savePage()
-
+*/
   //println(allPages.indexOf("Nation Suisse"))
 
   println("Done")

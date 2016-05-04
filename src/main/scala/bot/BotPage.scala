@@ -7,7 +7,6 @@ import bot.utils.IO._
 import JSONParser.parseBotData
 import bot.wiki.WikiPage
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
-import bot.Bot._
 
 case class BotPage(
                     bot: MediaWikiBot,
@@ -41,7 +40,8 @@ case class BotPage(
     this.copy(pages = pages ::: this.pages)
 
   def withTotalPages: BotPage =
-    this.copy(totalPages = allPages.length)
+    //this.copy(totalPages = all.length)
+  this
 
   def removeFileInArticles(exceptions: List[String]): BotPage = {
     val pages = this.pages.filter(p => !exceptions.contains(p.title))
@@ -71,7 +71,7 @@ object BotPage {
   val END_CACHE = "<=====END==CACHE=====>"
 
   def updateImages(idx: Int): Unit = {
-    val botPage = BotPage
+    /*val botPage = BotPage
       .getPageFromArticle(bot)
       .withTotalPages
       .withPages {
@@ -83,7 +83,7 @@ object BotPage {
               .withImages()
           }
       }
-    botPage.savePage()
+    botPage.savePage()*/
   }
 
   def getPageFromArticle(bot: MediaWikiBot): BotPage = {

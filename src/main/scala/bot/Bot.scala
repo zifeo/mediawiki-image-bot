@@ -10,9 +10,12 @@ final class Bot(url: String, login: String, pass: String, blacklist: List[String
 
   private lazy val bot = new MediaWikiBot(url)
 
-  lazy val allPageTitles = new AllPageTitles(bot).iterator().asScala.toList
+  lazy val allPageTitles = new AllPageTitles(bot).iterator().asScala.toStream
 
-  lazy val allWikiPages = allPageTitles.map(p => new WikiPage(bot.getArticle(p)))
+  lazy val allWikiPages = allPageTitles.map { title =>
+    log.debug("loading {}", title)
+    new WikiPage(bot.getArticle(title))
+  }
 
   lazy val allLiteralPages = allWikiPages
 

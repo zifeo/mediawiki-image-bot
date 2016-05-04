@@ -29,7 +29,7 @@ object IO {
         content = googleRequest(page)
       }
       //content.parseJson.asJsObject
-      val obj = new JSONObject(content)
+      var obj = new JSONObject(content)
       try {
         // obj.fields("error").asJsObject.fields("code").convertTo[String]
         if (obj.getJSONObject("error").getString("code") == "403") {
