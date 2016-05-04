@@ -8,7 +8,7 @@ case class WikiPage(
                      title: String,
                      revisionId: String,
                      pageType: PageType,
-                     images: List[WikiImage]
+                     images: Set[WikiImage]
                    ) {
 
   def this(article: Article) {
@@ -16,7 +16,7 @@ case class WikiPage(
       article.getTitle,
       article.getRevisionId,
       Classifier.findPageType(article.getTitle),
-      List.empty
+      Set.empty
     )
   }
 

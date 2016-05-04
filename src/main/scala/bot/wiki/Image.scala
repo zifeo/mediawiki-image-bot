@@ -18,9 +18,9 @@ class Image(val page: String, val link: String, val snippet: String) {
       val from = new File(fileName)
       val to = new File(path + "thumbnail.jpg")
       if (!from.exists() && !to.exists()) {
-        downloadImageFromURL(link, BASE_PATH + page + "/", fileName)
-        resize(fileName, from.getPath, ORIG_SIZE)
-        resize(fileName, to.getPath, THUMB_SIZE)
+        //downloadImageFromURL(link, BASE_PATH + page + "/", fileName)
+        //resize(fileName, from.getPath, ORIG_SIZE)
+        //resize(fileName, to.getPath, THUMB_SIZE)
       }
       path
     } else {

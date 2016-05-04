@@ -2,7 +2,7 @@ package bot.scenarios
 
 import bot._
 
-object ShowState extends BotApp {
+object StateETL extends BotApp {
 
   println(bot.state)
 

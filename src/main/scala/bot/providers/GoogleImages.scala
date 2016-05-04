@@ -6,7 +6,6 @@ import java.net.{HttpURLConnection, URL}
 import bot._
 import bot.wiki.Image
 import net.coobird.thumbnailator.Thumbnails
-import org.json.JSONObject
 
 import scala.io.Source
 
@@ -21,7 +20,7 @@ object GoogleImages {
   private def googleRequest(link: String): String =
     Source.fromURL(BASE_URL_1 + link.replaceAll(" ", "+") + BASE_URL_2 + KEYS(idx)).mkString
 
-  def parseRequest(page: String): List[Image] = {
+  /*def parseRequest(page: String): List[Image] = {
     try {
       var content = googleRequest(page)
       if (content.isEmpty) {
@@ -94,5 +93,6 @@ object GoogleImages {
   }
 
   def safeString(raw: String) = "\"" + raw.replaceAll("\"", "\\\\\"") + "\""
+  */
 
 }
