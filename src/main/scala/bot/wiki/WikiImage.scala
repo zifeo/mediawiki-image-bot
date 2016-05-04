@@ -5,7 +5,7 @@ case class WikiImage(
                       author: Option[String],
                       url: String,
                       tags: List[String],
-                      description: Option[String],
+                      description: String,
                       license: String,
                       discarded: Boolean = false
                     )
