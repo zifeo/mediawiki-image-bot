@@ -1,5 +1,7 @@
 package bot
 
+import java.io.File
+
 import bot.utils.Classifier
 import bot.wiki.{BotState, WikiImage, WikiPage}
 import net.sourceforge.jwbf.core.contentRep.Article
@@ -85,13 +87,11 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
     bot.login(login, pass)
 
   /** Adds an image and the page in state (if not already present). */
-  def add(page: WikiPage, image: WikiImage): Unit =
+  def add(page: WikiPage, image: WikiImage, file: File): Unit =
     if (!page.images.contains(image)) {
       log.info("Adding {}", page.title)
 
-      val load = bot.getPerformedAction(new FileUpload(new SimpleFile(page.title), bot))
-      assert(load.hasMoreMessages, "upload failed")
-      log.debug("Load result: {}", load.getNextMessage.getRequest)
+      bot.getPerformedAction(new FileUpload(new SimpleFile(image.filename, file), bot))
 
       val article = bot.getArticle(page.title)
       Bot.addImageTag(article, image)
@@ -152,7 +152,7 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
 
 object Bot {
 
-  private val imageTag = "\\[\\[File:(.+)\\|thumb=(.+?)\\|(.+)\\]\\]".r
+  private val imageTag = "\\[\\[File:(.+)\\|(.+)\\|(.+)\\]\\]".r
 
   val startCacheTag = "<!-----BOTCACHE=====!>"
   val endCacheTag = "<!=====ENDCACHE-----!>"
@@ -178,10 +178,9 @@ object Bot {
   /** Adds given image in article. */
   private def addImageTag(article: Article, image: WikiImage): Unit =
     if (imageTag.findFirstMatchIn(article.getText).isEmpty) {
-      val pathOriginal = ""
-      val pathThumb = ""
+      val filename = image.filename
       val description = image.description
-      val imageTag = s"""[[File:$pathOriginal|thumb=$pathThumb|alt=Alt|$description]]\n\n"""
+      val imageTag = s"""[[File:$filename|thumb|200x200px|upright|$description]]\n"""
       article.setText(imageTag + article.getText)
       article.save()
     }

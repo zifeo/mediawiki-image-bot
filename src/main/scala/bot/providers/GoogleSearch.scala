@@ -6,6 +6,7 @@ import java.net.{URL, URLEncoder}
 import bot._
 import bot.wiki.WikiImage
 import spray.json._
+import spray.json.DefaultJsonProtocol._
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -30,21 +31,18 @@ object GoogleSearch {
       assert(keyIdx < keys.length, "no valid key found")
       apply(terms)
     } else {
-      res("queries")
-        .asJsObject
-        .fields
-        .get("items")
-        .flatMap(_.convertTo[List[JsObject]])
-        .toList
+      res("items")
+        .convertTo[List[JsObject]]
         .map { json =>
 
           val fields = json.fields
-          val title = fields("snippet").convertTo[String]
+          val filename = fields("snippet").convertTo[String].take(50).trim
           val link = fields("link").convertTo[String]
           val file = tempFileFromStream(new URL(link).openStream())
+          val ext = file.getPath.reverse.takeWhile(_ != '.').reverse
 
-          log.debug("Found: {}", title)
-          WikiImage(title, None, link, List.empty, None, "cc") -> file
+          log.debug("Found: {}", filename)
+          WikiImage(URLEncoder.encode(filename, "UTF-8") + s".ext", None, link, List.empty, filename, "cc") -> file
         }
     }
   }
