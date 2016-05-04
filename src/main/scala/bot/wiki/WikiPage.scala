@@ -3,7 +3,9 @@ package bot.wiki
 import java.util.Calendar
 
 import bot._
-import bot.utils.IO._
+import bot.providers.GoogleImages
+import GoogleImages._
+import bot.providers.GoogleImages
 import bot.utils.Tokenizer
 import bot.wiki.PageType.PageType
 import net.sourceforge.jwbf.core.contentRep.Article
@@ -115,22 +117,21 @@ case class WikiPage private (
 
 object WikiPage {
 
-  private val DATE_YEAR_REGEX = "\\d{0,4}".r
-  private val DATE_COMPLETE_REGEX = "\\d{0,4}\\.(?:\\d|\\*){0,2}.(?:\\d|\\*){0,2}".r
-  private val DATE_INTERVAL_REGEX = "\\d{0,4}(?:-\\d{0,4})?\\.\\d{0,2}(?:-\\d{0,2})?\\.\\d{0,2}(?:-\\d{0,2})?".r
-  private val LOCATION_REGEX = "\\d{15,}".r
-  private val DATE_UNCONVERTIBLE_REGEX = "-.*".r
-  private val WORD_REGEX = "[^#+*/=&%_$£!<>§°\"/`:;]+".r
+  private val dateYear = "\\d{0,4}".r
+  private val dateComplete = "\\d{0,4}\\.(?:\\d|\\*){0,2}.(?:\\d|\\*){0,2}".r
+  private val dateInterval = "\\d{0,4}(?:-\\d{0,4})?\\.\\d{0,2}(?:-\\d{0,2})?\\.\\d{0,2}(?:-\\d{0,2})?".r
+  private val temporalRef = "-?\\d{5,14}".r
+  private val locationRef = "\\d{15,}".r
+  private val literal = "[^#+*/=&%_$£!<>§°/`:;]+".r
 
   val blacklist = config.getStringList("blacklist").asScala.toSet
 
   def findPageType(title: String): PageType = {
     if (blacklist.contains(title)) PageType.BLACKLISTED
     else title match {
-      case DATE_YEAR_REGEX() | DATE_COMPLETE_REGEX() | DATE_INTERVAL_REGEX() => PageType.DATE
-      case LOCATION_REGEX() => PageType.LOCATION
-      case WORD_REGEX() => PageType.LITERAL
-      case DATE_UNCONVERTIBLE_REGEX() => PageType.UNCLASSIFIED
+      case dateYear() | dateComplete() | dateInterval() | temporalRef() => PageType.DATE
+      case locationRef() => PageType.LOCATION
+      case literal() => PageType.LITERAL
       case _ => PageType.UNCLASSIFIED
     }
   }

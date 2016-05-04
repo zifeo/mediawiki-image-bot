@@ -1,7 +1,8 @@
 package bot.wiki
 
-import bot.utils.IO
-import IO._
+import bot.providers.GoogleImages
+import GoogleImages._
+import bot.providers.GoogleImages
 
 class WikiImage(
                  snippet: String,

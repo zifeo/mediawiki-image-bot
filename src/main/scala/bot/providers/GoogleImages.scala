@@ -1,4 +1,4 @@
-package bot.utils
+package bot.providers
 
 import java.io._
 import java.net.{HttpURLConnection, URL}
@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 import scala.io.Source
 
-object IO {
+object GoogleImages {
 
   private var idx = 0
   private val KEYS = config.getList("google.keys").toArray

@@ -1,4 +1,4 @@
-package bot.flickr
+package bot.providers
 
 import java.io.File
 import java.nio.file.{Files, StandardCopyOption}
@@ -9,7 +9,7 @@ import com.flickr4java.flickr.{Flickr, REST}
 
 import scala.collection.JavaConverters._
 
-object Fli {
+object FlickrImages {
 
   val licenses = Map(
     1 -> "http://creativecommons.org/licenses/by-nc-sa/2.0/",
@@ -47,7 +47,7 @@ object Fli {
     params.setLicense(licenses.keys.mkString(","))
     params.setMedia("photos")
     params.setSort(SearchParameters.INTERESTINGNESS_DESC)
-    params.setSafeSearch(Flickr.SAFETYLEVEL_SAFE)
+    params.setSafeSearch(FlickrImages.SAFETYLEVEL_SAFE)
     flickr.getPhotosInterface.search(params, 5, 1).asScala.toList
   }
 

@@ -13,7 +13,7 @@ final class Bot(url: String, login: String, pass: String, blacklist: List[String
   lazy val allPageTitles = new AllPageTitles(bot).iterator().asScala.toStream
 
   lazy val allWikiPages = allPageTitles.map { title =>
-    log.debug("loading {}", title)
+    log.debug("Loading {}", title)
     new WikiPage(bot.getArticle(title))
   }
 
