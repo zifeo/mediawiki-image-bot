@@ -3,29 +3,13 @@ package bot.flickr
 import java.io.File
 import java.nio.file.{Files, StandardCopyOption}
 
-import bot.utils.Regex
+import bot._
 import com.flickr4java.flickr.photos.{Photo, SearchParameters, Size}
 import com.flickr4java.flickr.{Flickr, REST}
-import net.sourceforge.jwbf.core.contentRep.Article
-import net.sourceforge.jwbf.mediawiki.actions.queries.AllPageTitles
-import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 
 import scala.collection.JavaConverters._
 
-import bot._
-
 object Fli {
-
-  val bot = new MediaWikiBot(config.getString("mediawiki"))
-
-  val allPages = new AllPageTitles(bot).iterator().asScala.toList
-  val allLiteralPages = allPages.filter(p => Regex.atLeastOneChar.findFirstIn(p).isDefined)
-
-  val article = bot.getArticle("Bots")
-  //println(article.getText)
-  //println(hyperwordTokenizer(article))
-  //println(usersTokenizer(article))
-  //println(subtitleTokenizer(article))
 
   val licenses = Map(
     1 -> "http://creativecommons.org/licenses/by-nc-sa/2.0/",

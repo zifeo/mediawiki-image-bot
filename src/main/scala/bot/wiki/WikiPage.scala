@@ -2,57 +2,56 @@ package bot.wiki
 
 import java.util.Calendar
 
-import bot.utils.{IO, Tokenizer}
-import IO._
+import bot.utils.IO._
 import PageType.PageType
-import bot.utils.Tokenizer
-import bot.Bot
-import bot.Bot._
+import bot.utils.{IO, Tokenizer}
+import bot._
 import net.sourceforge.jwbf.core.contentRep.Article
 import net.sourceforge.jwbf.mediawiki.actions.editing.FileUpload
 import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
+import scala.collection.JavaConverters._
 
-
-case class WikiPage(
+case class WikiPage private (
                      title: String,
-                     timestamp: Long,
                      revisionId: String,
                      editor: String,
                      editSummary: String,
                      pageType: PageType,
                      keywords: List[String],
                      images: List[WikiImage],
-                     ignored: List[String]
+                     ignoredImages: List[String],
+                     timestamp: Long
                    ) {
 
   def this(article: Article) {
     this(
       article.getTitle,
-      Calendar.getInstance().getTimeInMillis,
       article.getRevisionId,
       article.getEditor,
       article.getEditSummary,
-      WikiPage.getTypeOfArticle(article.getTitle),
-      List(),
-      List(),
-      List()
+      WikiPage.findPageType(article),
+      Tokenizer.hyperword(article),
+      List.empty,
+      List.empty,
+      Calendar.getInstance().getTimeInMillis
     )
   }
 
-  def isMaxImageReached: Boolean = ignored.length > 5
+  def isMaxImageReached: Boolean = ignoredImages.length > 5
 
   def withKeywords: WikiPage = {
-    this.copy(keywords = (keywords ++ Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct)
+    //this.copy(keywords = (keywords ++ Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct)
+    this
   }
 
   def withIgnored(url: String): WikiPage = {
-    this.copy(ignored = url :: ignored, images = images.filter(i => i.url != url))
+    this.copy(ignoredImages = url :: ignoredImages, images = images.filter(i => i.url != url))
   }
 
   def withImages(): WikiPage = {
     val images = IO.parseRequest(title)
 
-    val image = images.find(img => !ignored.contains(img.link))
+    val image = images.find(img => !ignoredImages.contains(img.link))
 
     println(title)
 
@@ -102,7 +101,7 @@ case class WikiPage(
        |  "pageType": ${safeString(pageType.toString)},
        |  "keywords" : ${listToString(keywords)},
        |  "images" : ${if (images.isEmpty) "[]" else "[" + images.mkString(",") + "]"},
-       |  "ignored" : ${listToString(ignored)}
+       |  "ignored" : ${listToString(ignoredImages)}
        |}
     """.stripMargin
   }
@@ -123,13 +122,20 @@ object WikiPage {
   private val LOCATION_REGEX = "\\d{15,}".r
   private val DATE_UNCONVERTIBLE_REGEX = "-.*".r
   private val WORD_REGEX = "[^#+*/=&%_$£!<>§°\"/`:;]+".r
+  val atLeastOneChar = """[a-zA-Z]""".r
 
-  def getTypeOfArticle(title: String): PageType = title match {
-    case DATE_YEAR_REGEX() | DATE_COMPLETE_REGEX() | DATE_INTERVAL_REGEX() => PageType.DATE
-    case LOCATION_REGEX() => PageType.LOCATION
-    case DATE_UNCONVERTIBLE_REGEX() => PageType.NONE
-    case WORD_REGEX() => PageType.ARTICLE
-    case _ => PageType.NONE
+  val blacklist = config.getStringList("blacklist").asScala.toSet
+
+  def findPageType(article: Article): PageType = {
+    val title = article.getTitle
+    if (blacklist.contains(title)) PageType.BLACKLISTED
+    else title match {
+      case DATE_YEAR_REGEX() | DATE_COMPLETE_REGEX() | DATE_INTERVAL_REGEX() => PageType.DATE
+      case LOCATION_REGEX() => PageType.LOCATION
+      case WORD_REGEX() => PageType.LITERAL
+      case DATE_UNCONVERTIBLE_REGEX() => PageType.UNCLASSIFIED
+      case _ => PageType.UNCLASSIFIED
+    }
   }
 
 }
