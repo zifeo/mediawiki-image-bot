@@ -32,7 +32,7 @@ object FlickrSearch {
     params.setText(terms)
     params.setLicense(licenses.keys.mkString(","))
     params.setMedia("photos")
-    params.setSort(SearchParameters.INTERESTINGNESS_DESC)
+    params.setSort(SearchParameters.RELEVANCE)
     params.setSafeSearch(Flickr.SAFETYLEVEL_SAFE)
 
     flickr
