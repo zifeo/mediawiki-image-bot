@@ -4,27 +4,26 @@ import java.io._
 import java.net.{HttpURLConnection, URL}
 
 import bot._
-import bot.wiki.Image
 import net.coobird.thumbnailator.Thumbnails
 
 import scala.io.Source
 
-object GoogleImages {
+object GoogleSearch {
 
-  private var idx = 0
-  private val KEYS = config.getList("google.keys").toArray
+  private var keyIdx = 0
+  private val keys = config.getList("google.keys").toArray
 
-  private val BASE_URL_1 = "https://www.googleapis.com/customsearch/v1?q="
-  private val BASE_URL_2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
+  private val apiUrl1 = "https://www.googleapis.com/customsearch/v1?q="
+  private val apiUrl2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num=5&rights=cc_attribute&searchType=image&key="
 
   private def googleRequest(link: String): String =
-    Source.fromURL(BASE_URL_1 + link.replaceAll(" ", "+") + BASE_URL_2 + KEYS(idx)).mkString
+    Source.fromURL(apiUrl1 + link.replaceAll(" ", "+") + apiUrl2 + keys(keyIdx)).mkString
 
   /*def parseRequest(page: String): List[Image] = {
     try {
       var content = googleRequest(page)
       if (content.isEmpty) {
-        idx += 1
+        keyIdx += 1
         content = googleRequest(page)
       }
       //content.parseJson.asJsObject
@@ -32,12 +31,13 @@ object GoogleImages {
       try {
         // obj.fields("error").asJsObject.fields("code").convertTo[String]
         if (obj.getJSONObject("error").getString("code") == "403") {
-          idx += 1
+          keyIdx += 1
           obj = new JSONObject(googleRequest(page))
         }
       } catch {
         case _: Exception =>
       }
+
       if (obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("totalResults") > 0) {
         val items = obj.getJSONArray("items")
         Stream.range(0, obj.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getInt("count"))
@@ -45,14 +45,17 @@ object GoogleImages {
           .toList
       } else
         List()
-    }
-    catch {
-      case e: Exception => if (idx < KEYS.length) {
-        println(BASE_URL_1 + page.replaceAll(" ", "+") + BASE_URL_2 + KEYS(idx))
-        e.printStackTrace()
-        idx += 1
-        parseRequest(page)
-      } else List()
+
+    } catch {
+      case e: Exception =>
+        if (keyIdx < keys.length) {
+          println(apiUrl1 + page.replaceAll(" ", "+") + apiUrl2 + keys(keyIdx))
+          e.printStackTrace()
+          keyIdx += 1
+          parseRequest(page)
+        }
+        else
+          List()
     }
   }
 
@@ -92,7 +95,6 @@ object GoogleImages {
     }
   }
 
-  def safeString(raw: String) = "\"" + raw.replaceAll("\"", "\\\\\"") + "\""
-  */
+  def safeString(raw: String) = "\"" + raw.replaceAll("\"", "\\\\\"") + "\""*/
 
 }

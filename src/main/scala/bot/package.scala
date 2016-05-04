@@ -1,3 +1,5 @@
+import java.io.{File, InputStream}
+import java.nio.file.{StandardCopyOption, Files}
 import java.util.logging.LogManager
 
 import bot.wiki._
@@ -14,6 +16,14 @@ package object bot {
   val config = ConfigFactory.load().getConfig("bot")
   val log = Logger(LoggerFactory.getLogger("bot"))
 
+  def tempFileFromStream(stream: InputStream): File = {
+    val file = File.createTempFile("mediawiki-image-bot-", ".jpg")
+    file.deleteOnExit()
+    Files.copy(stream, file.toPath, StandardCopyOption.REPLACE_EXISTING)
+    stream.close()
+    file
+  }
+
   implicit object pageTypeFormat extends RootJsonFormat[PageType.PageType] {
 
     val mapping = PageType.values.map(v => v.toString -> v).toMap
@@ -27,7 +37,7 @@ package object bot {
     }
   }
 
-  implicit val wikiImageFormat: RootJsonFormat[WikiImage] = jsonFormat5(WikiImage)
+  implicit val wikiImageFormat: RootJsonFormat[WikiImage] = jsonFormat7(WikiImage)
   implicit val wikiPageFormat: RootJsonFormat[WikiPage] = jsonFormat4(WikiPage)
   implicit val botStateFormat: RootJsonFormat[BotState] = jsonFormat3(BotState.apply)
 

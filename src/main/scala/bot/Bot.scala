@@ -25,18 +25,17 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
   def signIn(): Unit =
     bot.login(login, pass)
 
-  def saveState(): Unit =
-    _state.save(bot)
-
   def state: BotState =
     _state
 
+  def saveState(): Unit =
+    _state.save(bot)
 
-}
 
-object Bot {
 
-  val startCacheTag = "<=====START==CACHE=====>"
-  val endCacheTag = "<=====END==CACHE=====>"
+
+  //bot.login(config.getString("login"), config.getString("password"))
+  //article.save()
+  //bot.getPerformedAction(new FileUpload(new SimpleFile(file), bot))
 
 }
