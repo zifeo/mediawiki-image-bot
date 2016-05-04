@@ -1,9 +1,9 @@
 package bot.wiki
 
 import java.io.File
-
-import bot.utils.IO
-import bot.utils.IO._
+import bot.providers.GoogleImages
+import GoogleImages._
+import bot.providers.GoogleImages
 
 class Image(val page: String, val link: String, val snippet: String) {
 
