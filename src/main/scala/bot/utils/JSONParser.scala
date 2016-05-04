@@ -26,16 +26,17 @@ object JSONParser {
 
     val images = Stream.range(0, jsonImages.length()).map(i => parseImage(jsonImages.getJSONObject(i))).toList
 
-    new WikiPage(
+    WikiPage(
       json.getString("title"),
-      json.getLong("timestamp"),
       json.getString("revisionId"),
       json.getString("editor"),
       json.getString("editSummary"),
-      PageType.withName(json.getString("pageType").toUpperCase),
+      PageType.UNCLASSIFIED /*PageType.withName(json.getString("pageType").toUpperCase)*/,
       toList(json.getJSONArray("keywords")),
       images,
-      toList(json.getJSONArray("ignored")))
+      toList(json.getJSONArray("ignored")),
+      json.getLong("timestamp")
+    )
   }
 
   private def parseImage(raw: JSONObject): WikiImage =

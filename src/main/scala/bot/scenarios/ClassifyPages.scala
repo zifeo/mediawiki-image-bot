@@ -1,10 +1,18 @@
 package bot.scenarios
 
-import bot.BotApp
+import bot._
+import bot.wiki.WikiPage
 
-class ClassifyPages extends BotApp {
+object ClassifyPages extends BotApp {
 
-  bot.pages
+  bot
+    .allPageTitles
+    .groupBy(WikiPage.findPageType)
+    .foreach { case (pageType, pages) =>
 
+      val pageList = pages.mkString("\n  - ")
+      println(s"$pageType:\n  - $pageList")
+
+    }
 
 }

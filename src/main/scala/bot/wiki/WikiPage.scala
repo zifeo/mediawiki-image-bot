@@ -2,26 +2,25 @@ package bot.wiki
 
 import java.util.Calendar
 
-import bot.utils.IO._
-import PageType.PageType
-import bot.utils.{IO, Tokenizer}
 import bot._
+import bot.utils.IO._
+import bot.utils.Tokenizer
+import bot.wiki.PageType.PageType
 import net.sourceforge.jwbf.core.contentRep.Article
-import net.sourceforge.jwbf.mediawiki.actions.editing.FileUpload
-import net.sourceforge.jwbf.mediawiki.contentRep.SimpleFile
+
 import scala.collection.JavaConverters._
 
 case class WikiPage private (
-                     title: String,
-                     revisionId: String,
-                     editor: String,
-                     editSummary: String,
-                     pageType: PageType,
-                     keywords: List[String],
-                     images: List[WikiImage],
-                     ignoredImages: List[String],
-                     timestamp: Long
-                   ) {
+                              title: String,
+                              revisionId: String,
+                              editor: String,
+                              editSummary: String,
+                              pageType: PageType,
+                              keywords: List[String],
+                              images: List[WikiImage],
+                              ignoredImages: List[String],
+                              timestamp: Long
+                            ) {
 
   def this(article: Article) {
     this(
@@ -29,7 +28,7 @@ case class WikiPage private (
       article.getRevisionId,
       article.getEditor,
       article.getEditSummary,
-      WikiPage.findPageType(article),
+      WikiPage.findPageType(article.getTitle),
       Tokenizer.hyperword(article),
       List.empty,
       List.empty,
@@ -39,7 +38,7 @@ case class WikiPage private (
 
   def isMaxImageReached: Boolean = ignoredImages.length > 5
 
-  def withKeywords: WikiPage = {
+  /*def withKeywords: WikiPage = {
     //this.copy(keywords = (keywords ++ Tokenizer.hyperwordTokenizer(Bot.bot.getArticle(title))).distinct)
     this
   }
@@ -86,7 +85,7 @@ case class WikiPage private (
       println("ERREUR")
       this
     }
-  }
+  }*/
 
   private def clearString(raw: String): String = raw.replaceAll(".jpg", "").replaceAll(".png", "").replaceAll(".gif", "").replaceAll("fichier:", "").replaceAll("Fichier:", "").replaceAll("file:", "").replaceAll("File:", "")
 
@@ -121,13 +120,11 @@ object WikiPage {
   private val DATE_INTERVAL_REGEX = "\\d{0,4}(?:-\\d{0,4})?\\.\\d{0,2}(?:-\\d{0,2})?\\.\\d{0,2}(?:-\\d{0,2})?".r
   private val LOCATION_REGEX = "\\d{15,}".r
   private val DATE_UNCONVERTIBLE_REGEX = "-.*".r
-  private val WORD_REGEX = "[^#+*/=&%_$£!<>§°\"/`:;]+".r
-  val atLeastOneChar = """[a-zA-Z]""".r
+  private val WORD_REGEX = """[^#+*/=&%_$£!<>§°\\"/`:;]+""".r
 
   val blacklist = config.getStringList("blacklist").asScala.toSet
 
-  def findPageType(article: Article): PageType = {
-    val title = article.getTitle
+  def findPageType(title: String): PageType = {
     if (blacklist.contains(title)) PageType.BLACKLISTED
     else title match {
       case DATE_YEAR_REGEX() | DATE_COMPLETE_REGEX() | DATE_INTERVAL_REGEX() => PageType.DATE
