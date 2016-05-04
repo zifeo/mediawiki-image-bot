@@ -1,28 +1,26 @@
 package bot
 
-import bot.utils.Regex
-import bot.wiki.{PageType, WikiPage}
+import bot.wiki.WikiPage
 import net.sourceforge.jwbf.mediawiki.actions.queries.AllPageTitles
 import net.sourceforge.jwbf.mediawiki.bots.MediaWikiBot
 
 import scala.collection.JavaConverters._
 
-object Bot {
+final class Bot(url: String, login: String, pass: String, blacklist: List[String]) {
 
-  val bot = new MediaWikiBot(config.getString("mediawiki"))
+  private lazy val bot = new MediaWikiBot(url)
 
-  val blacklist = config.getList("blacklist")
+  lazy val allPageTitles = new AllPageTitles(bot).iterator().asScala.toList
 
-  val allPages = new AllPageTitles(bot).iterator().asScala.toList.filter(p => !blacklist.contains(p))
-  val allLiteralPages = allPages.filter(p => Regex.atLeastOneChar.findFirstIn(p).isDefined)
+  lazy val allWikiPages = allPageTitles.map(p => new WikiPage(bot.getArticle(p)))
 
-  def login() = bot.login(config.getString("login"), config.getString("password"))
+  lazy val allLiteralPages = allWikiPages
 
-  def traverAllPages() = {
-    allPages.filter(p => WikiPage.getTypeOfArticle(p) == PageType.NONE).foreach(p => {
-      println(p)
-    })
-  }
+  def signIn(): Unit =
+    bot.login(login, pass)
+
+
+
 
   private val REMOVE_FILE_REGEX = "\\[\\[File:(.+)\\|thumb=(.+?)\\|(.+)\\]\\]"
 
