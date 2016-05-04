@@ -8,7 +8,7 @@ import spray.json._
 case class BotState (
                       botPage: String,
                       revisionId: String,
-                      pages: List[WikiPage]
+                      pages: Set[WikiPage]
                     ) {
 
   def save(bot: MediaWikiBot): Unit = {
@@ -26,7 +26,6 @@ case class BotState (
           "\n" +
           BotState.startCacheTag +
           this.toJson.compactPrint +
-          BotState.endCacheTag +
           text.substring(endIdx)
       )
       log.debug("Bot state found and replaced")
@@ -53,8 +52,8 @@ case class BotState (
 
 object BotState {
 
-  val startCacheTag = "<=====BOT==CACHE=====>"
-  val endCacheTag = "<=====END==CACHE=====>"
+  val startCacheTag = "<!-----BOTCACHE=====!>"
+  val endCacheTag = "<!=====ENDCACHE-----!>"
 
   def parse(article: Article): BotState = {
     log.debug("Loading bot state")
@@ -69,7 +68,7 @@ object BotState {
       text.substring(startIdx + BotState.startCacheTag.length, endIdx).parseJson.convertTo[BotState]
     } else {
       log.debug("Bot state not found, creating empty one")
-      BotState(article.getTitle, article.getRevisionId, List.empty)
+      BotState(article.getTitle, article.getRevisionId, Set.empty)
     }
   }
 
