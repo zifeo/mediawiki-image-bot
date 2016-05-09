@@ -8,4 +8,14 @@ case class WikiImage(
                       description: String,
                       license: String,
                       discarded: Boolean = false
-                    )
+                    ) {
+  def print() = {
+    println("WikiImage " + filename + " : ")
+    println("\tauthor     : " + author)
+    println("\turl        : " + url)
+    println("\ttags       : " + tags)
+    println("\tdescription: " + description)
+    println("\tlicence    : " + license)
+    println("\tdiscarded  : " + discarded)
+  }
+}
