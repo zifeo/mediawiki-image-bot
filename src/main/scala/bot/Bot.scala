@@ -80,6 +80,9 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
       Some(res)
     }
 
+  def getArticle(title : String) : Article =
+    bot.getArticle(title)
+
   def state: BotState =
     _state
 
