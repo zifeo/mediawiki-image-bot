@@ -25,7 +25,7 @@ object FlickrSearch {
     6 -> "by-nd/2.0"
   )
 
-  def apply(terms: String): List[(WikiImage, File)] = {
+  def apply(terms: String): Stream[(WikiImage, File)] = {
     log.info("Flickr searching for {}", terms)
 
     val params = new SearchParameters
@@ -39,7 +39,7 @@ object FlickrSearch {
       .getPhotosInterface
       .search(params, searchCount, 1)
       .asScala
-      .toList
+      .toStream
       .map { res =>
         val photo = flickr.getPhotosInterface.getInfo(res.getId, null)
 
