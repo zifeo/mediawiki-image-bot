@@ -32,11 +32,11 @@ object GoogleSearch {
       apply(terms)
     }
     else if (!res.contains("item")){
-      List.empty
+      Stream.empty
     } else {
       println(res)
       res("items")
-        .convertTo[Stream[JsObject]]
+        .convertTo[List[JsObject]].toStream
         .map { json =>
 
           val fields = json.fields
