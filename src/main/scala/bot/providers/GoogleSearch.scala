@@ -22,7 +22,7 @@ object GoogleSearch {
   private val apiUrl2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num="
   private val apiUrl3 = "&rights=cc_attribute&searchType=image&key="
 
-  def apply(terms: String): List[(WikiImage, File)] = {
+  def apply(terms: String): Stream[(WikiImage, File)] = {
     log.info("Google searching for {}", terms)
     val res = call(terms)
 
@@ -32,7 +32,7 @@ object GoogleSearch {
       apply(terms)
     } else {
       res("items")
-        .convertTo[List[JsObject]]
+        .convertTo[Stream[JsObject]]
         .map { json =>
 
           val fields = json.fields
