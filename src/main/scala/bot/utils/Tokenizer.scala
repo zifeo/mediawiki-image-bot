@@ -8,6 +8,8 @@ object Tokenizer {
 
   private val hyperwordSelector = """\[\[([^\]]+)\]\]""".r
   private val userSelector = """\[\[Utilisateur:([^\]]+)\]\]""".r
+  /* Years must be 3+ digits, otherwise we cannot distinguish them :-/ */
+  private val dateRegexes = List("""(\d{3,})[-\.]\d{1,2}[-\.]\d{1,2}""".r, """\d{1,2}[-\.]\d{1,2}[-\.](\d{3,})""".r)
 
   private def tokenizer(content: String, regex: Regex): List[String] =
     regex.findAllMatchIn(content).map(_.group(1).trim).toList
@@ -30,4 +32,11 @@ object Tokenizer {
       }
       .toList
 
+  def year(article: Article) : List[Int] = {
+    val content = article.getText
+    dateRegexes.flatMap(reg => tokenizer(content, reg)).map(y => y.toInt)
+  }
+
 }
+
+
