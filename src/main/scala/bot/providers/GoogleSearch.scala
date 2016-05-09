@@ -30,7 +30,11 @@ object GoogleSearch {
       keyIdx += 1
       assert(keyIdx < keys.length, "no valid key found")
       apply(terms)
+    }
+    else if (!res.contains("item")){
+      List.empty
     } else {
+      println(res)
       res("items")
         .convertTo[List[JsObject]]
         .map { json =>
@@ -48,11 +52,19 @@ object GoogleSearch {
   }
 
   private def call(query: String): Map[String, JsValue] =
+  try {
     Source
       .fromURL(apiUrl1 + URLEncoder.encode(query, "UTF-8") + apiUrl2 + searchCount + apiUrl3 + keys(keyIdx))
       .mkString
       .parseJson
       .asJsObject
       .fields
+  }
+  catch {
+    case _ : Exception =>
+      keyIdx += 1
+      assert(keyIdx < keys.length, "no valid key found")
+      call(query)
+  }
 
 }
