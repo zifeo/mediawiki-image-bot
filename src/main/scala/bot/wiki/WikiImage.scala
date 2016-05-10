@@ -9,7 +9,8 @@ case class WikiImage(
                       license: String,
                       discarded: Boolean = false
                     ) {
-  def print() = {
+
+  def print(): Unit = {
     println("WikiImage " + filename + " : ")
     println("\tauthor     : " + author)
     println("\turl        : " + url)
@@ -18,4 +19,5 @@ case class WikiImage(
     println("\tlicence    : " + license)
     println("\tdiscarded  : " + discarded)
   }
+
 }

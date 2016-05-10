@@ -30,8 +30,8 @@ object GoogleSearch {
       keyIdx += 1
       assert(keyIdx < keys.length, "no valid key found")
       apply(terms)
-    }
-    else if (!res.contains("item")){
+    } else if (!res.contains("items")) {
+      log.warn("Google failed to return items: {}", res)
       Stream.empty
     } else {
       println(res)
