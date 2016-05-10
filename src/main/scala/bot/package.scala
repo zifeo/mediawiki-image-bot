@@ -3,6 +3,8 @@ import java.nio.file.{StandardCopyOption, Files}
 import java.util.logging.LogManager
 
 import bot.wiki._
+import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.nio.PngWriter
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
@@ -16,10 +18,23 @@ package object bot {
   val config = ConfigFactory.load().getConfig("bot")
   val log = Logger(LoggerFactory.getLogger("bot"))
 
+  val maxSizeImage = config.getDouble("bot.maxImageSize")
+  implicit val writer = PngWriter.MinCompression
+
   def tempFileFromStream(stream: InputStream): File = {
-    val file = File.createTempFile("mediawiki-image-bot-", ".jpg")
+    val file = File.createTempFile("mediawiki-image-bot-", "")
     file.deleteOnExit()
-    Files.copy(stream, file.toPath, StandardCopyOption.REPLACE_EXISTING)
+
+    val image = Image.fromStream(stream)
+    val (width, height) = image.dimensions
+    log.info(s"image size: ${width}x$height")
+    val scaleFactor = (maxSizeImage / width.max(height)).min(1)
+    if (scaleFactor < 1) {
+      log.info("scale factor: {}", scaleFactor)
+    }
+    val resized = image.resize(scaleFactor).stream
+
+    Files.copy(resized, file.toPath, StandardCopyOption.REPLACE_EXISTING)
     stream.close()
     file
   }

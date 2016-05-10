@@ -1,7 +1,8 @@
 package bot.providers
 
 import java.io._
-import java.net.{URL, URLEncoder}
+import java.net.{URLDecoder, URL, URLEncoder}
+import java.nio.file.Files
 
 import bot._
 import bot.wiki.WikiImage
@@ -34,19 +35,28 @@ object GoogleSearch {
       log.warn("Google failed to return items: {}", res)
       Stream.empty
     } else {
-      println(res)
       res("items")
         .convertTo[List[JsObject]].toStream
         .map { json =>
 
           val fields = json.fields
-          val filename = fields("snippet").convertTo[String].take(50).trim
+          val name = fields("snippet")
+            .convertTo[String]
+            .take(50)
+            .trim
+            .replaceAll(".svg", "")
+            .replaceAll(".jpg", "")
+            .replaceAll(".jpeg", "")
+            .replaceAll(".png", "")
+            .replaceAll(".gif", "")
+            .replaceAll("File:", "")
+            .replaceAll("file:", "")
           val link = fields("link").convertTo[String]
           val file = tempFileFromStream(new URL(link).openStream())
-          val ext = file.getPath.reverse.takeWhile(_ != '.').reverse
+          val ext = link.reverse.takeWhile(_ != '.').reverse.toLowerCase
 
-          log.debug("Found: {}", filename)
-          WikiImage(URLEncoder.encode(filename, "UTF-8") + s".ext", None, link, List.empty, filename, "cc") -> file
+          log.debug("Found: {}", name)
+          WikiImage(s"$name.png", None, link, List.empty, name, "cc") -> file
         }
     }
   }

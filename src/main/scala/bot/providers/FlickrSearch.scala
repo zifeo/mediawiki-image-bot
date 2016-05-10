@@ -52,10 +52,9 @@ object FlickrSearch {
         val license = licenses(photo.getLicense.toInt)
         val tags = photo.getTags.asScala.toList.map(_.getValue)
         val file = tempFileFromStream(flickr.getPhotosInterface.getImageAsStream(photo, Size.MEDIUM))
-        val ext = file.getPath.reverse.takeWhile(_ != '.').reverse
 
         log.debug("Found: {}", filename)
-        WikiImage(URLEncoder.encode(filename, "UTF-8") + s".$ext", author, photo.getUrl, tags, description, license) -> file
+        WikiImage(URLEncoder.encode(filename, "UTF-8") + s".png", author, photo.getUrl, tags, description, license) -> file
       }
   }
 
