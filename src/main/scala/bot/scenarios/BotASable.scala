@@ -9,11 +9,11 @@ object BotASable extends BotApp {
 
   val Some(page) = bot.load("BotASable")
   val terms = "Herbert George Wells"
-  //bot.remove(page)
 
   val search = GoogleSearch(terms)
   val (image, file) = search.head
+  bot.add(page, image, file)
 
-  //bot.add(page, image, file)
+  //bot.remove(page)
 
 }

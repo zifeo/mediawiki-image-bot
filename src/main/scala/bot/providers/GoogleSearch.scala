@@ -1,13 +1,12 @@
 package bot.providers
 
 import java.io._
-import java.net.{URLDecoder, URL, URLEncoder}
-import java.nio.file.Files
+import java.net.{URL, URLEncoder}
 
 import bot._
 import bot.wiki.WikiImage
-import spray.json._
 import spray.json.DefaultJsonProtocol._
+import spray.json._
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -40,41 +39,32 @@ object GoogleSearch {
         .map { json =>
 
           val fields = json.fields
-          val name = fields("snippet")
-            .convertTo[String]
-            .take(50)
-            .trim
-            .replaceAll(".svg", "")
-            .replaceAll(".jpg", "")
-            .replaceAll(".jpeg", "")
-            .replaceAll(".png", "")
-            .replaceAll(".gif", "")
-            .replaceAll("File:", "")
-            .replaceAll("file:", "")
+          val name = cleanName(fields("snippet").convertTo[String]).trim
+          val description = fields.get("title").map(x => cleanName(x.convertTo[String]).take(200).trim).getOrElse(name)
           val link = fields("link").convertTo[String]
           val file = tempFileFromStream(new URL(link).openStream())
           val ext = link.reverse.takeWhile(_ != '.').reverse.toLowerCase
 
-          log.debug("Found: {}", name)
-          WikiImage(s"$name.png", None, link, List.empty, name, "cc") -> file
+          log.debug("Found: {}", fields("snippet"))
+          WikiImage(s"$name.png", None, link, List.empty, description, "cc") -> file
         }
     }
   }
 
   private def call(query: String): Map[String, JsValue] =
-  try {
-    Source
-      .fromURL(apiUrl1 + URLEncoder.encode(query, "UTF-8") + apiUrl2 + searchCount + apiUrl3 + keys(keyIdx))
-      .mkString
-      .parseJson
-      .asJsObject
-      .fields
-  }
-  catch {
-    case _ : Exception =>
-      keyIdx += 1
-      assert(keyIdx < keys.length, "no valid key found")
-      call(query)
-  }
+    try {
+      Source
+        .fromURL(apiUrl1 + URLEncoder.encode(query, "UTF-8") + apiUrl2 + searchCount + apiUrl3 + keys(keyIdx))
+        .mkString
+        .parseJson
+        .asJsObject
+        .fields
+    }
+    catch {
+      case _ : Exception =>
+        keyIdx += 1
+        assert(keyIdx < keys.length, "no valid key found")
+        call(query)
+    }
 
 }
