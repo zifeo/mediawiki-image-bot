@@ -1,7 +1,6 @@
 package bot.providers
 
 import java.io.File
-import java.net.URLEncoder
 
 import bot._
 import bot.wiki.WikiImage
@@ -43,8 +42,8 @@ object FlickrSearch {
       .map { res =>
         val photo = flickr.getPhotosInterface.getInfo(res.getId, null)
 
-        val filename = photo.getTitle
-        val description = Option(photo.getDescription).map(_.take(50).trim).getOrElse(filename)
+        val name = cleanName(photo.getTitle).trim
+        val description = Option(photo.getDescription).map(_.take(200).trim).getOrElse(name)
         val author = Some(
           if (Option(photo.getOwner.getRealName).getOrElse("").nonEmpty) photo.getOwner.getRealName
           else photo.getOwner.getUsername
@@ -53,8 +52,8 @@ object FlickrSearch {
         val tags = photo.getTags.asScala.toList.map(_.getValue)
         val file = tempFileFromStream(flickr.getPhotosInterface.getImageAsStream(photo, Size.MEDIUM))
 
-        log.debug("Found: {}", filename)
-        WikiImage(URLEncoder.encode(filename, "UTF-8") + s".png", author, photo.getUrl, tags, description, license) -> file
+        log.debug("Found: {}", name)
+        WikiImage(s"$name.png", author, photo.getUrl, tags, description, license) -> file
       }
   }
 

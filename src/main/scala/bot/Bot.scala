@@ -133,7 +133,6 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
       assert(startIdx < endIdx, "invalid bot cache")
       article.setText(
         text.substring(0, startIdx) +
-          "\n" +
           Bot.startCacheTag +
           _state.toJson.compactPrint +
           text.substring(endIdx)
@@ -142,7 +141,6 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
     } else {
       article.setText(
         text +
-          "\n" +
           Bot.startCacheTag +
           _state.toJson.compactPrint +
           Bot.endCacheTag
@@ -182,23 +180,16 @@ object Bot {
   /** Adds given image in article. */
   private def addImageTag(article: Article, image: WikiImage): Unit =
     if (imageTag.findFirstMatchIn(article.getText).isEmpty) {
-      val filename = image.filename
-      val description = image.description
-      val imageTag = s"""[[File:$filename|thumb|200x200px|upright|$description]]\n"""
-      article.setText(imageTag + article.getText)
+      article.setText(image.wikitag + article.getText)
       article.save()
     }
 
   /** Removes given image from article. */
   private def removeImageTag(article: Article, image: WikiImage): Unit = {
     val text = article.getText
-    val url = image.url
-    text match {
-      case imageTag(`url`, _, _) => // image set by the bot
-        article.setText(imageTag.replaceAllIn(text, "").trim)
-        article.save()
-      case _ => // other image
-    }
+    article.setText(text.replace(image.wikitag, "").trim)
+    article.save()
   }
+
 
 }

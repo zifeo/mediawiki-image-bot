@@ -1,5 +1,5 @@
 import java.io.{File, InputStream}
-import java.nio.file.{StandardCopyOption, Files}
+import java.nio.file.{Files, StandardCopyOption}
 import java.util.logging.LogManager
 
 import bot.wiki._
@@ -18,8 +18,21 @@ package object bot {
   val config = ConfigFactory.load().getConfig("bot")
   val log = Logger(LoggerFactory.getLogger("bot"))
 
-  val maxSizeImage = config.getDouble("bot.maxImageSize")
+  val maxSizeImage = config.getDouble("maxImageSize")
   implicit val writer = PngWriter.MinCompression
+
+  def cleanName(raw: String): String =
+    raw
+      .trim
+      .replaceAll(".svg", "")
+      .replaceAll(".jpg", "")
+      .replaceAll(".jpeg", "")
+      .replaceAll(".png", "")
+      .replaceAll(".gif", "")
+      .replaceAll("File:", "")
+      .replaceAll("file:", "")
+      .replaceAll("Ficher:", "")
+      .replaceAll("fichier:", "")
 
   def tempFileFromStream(stream: InputStream): File = {
     val file = File.createTempFile("mediawiki-image-bot-", "")
