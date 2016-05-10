@@ -1,19 +1,19 @@
 package bot.scenarios
 
 import bot.BotApp
-import bot.providers.{GoogleSearch, FlickrSearch}
+import bot.providers.GoogleSearch
 
 object BotASable extends BotApp {
 
   bot.signIn()
 
   val Some(page) = bot.load("BotASable")
-  val terms = "Chrétiens sociaux"
+  val terms = "Herbert George Wells"
+  //bot.remove(page)
 
   val search = GoogleSearch(terms)
-  println(search.toList)
-  val (image, file) #:: _ = search
+  val (image, file) = search.head
 
-  bot.add(page, image, file)
+  //bot.add(page, image, file)
 
 }

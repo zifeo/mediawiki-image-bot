@@ -92,8 +92,9 @@ final class Bot(val url: String, val login: String, pass: String, val pageBot: S
   /** Adds an image and the page in state (if not already present). */
   def add(page: WikiPage, image: WikiImage, file: File): Unit =
     if (!page.images.contains(image)) {
-      log.info("Adding {}", page.title)
+      log.info("Adding {} to {}", image.filename, page.title)
 
+      val a = new SimpleFile(image.filename, file)
       bot.getPerformedAction(new FileUpload(new SimpleFile(image.filename, file), bot))
 
       val article = bot.getArticle(page.title)
