@@ -1,9 +1,12 @@
 package bot.scenarios
 
+import java.io.File
+
 import bot._
 import bot.providers.{FlickrSearch, GoogleSearch}
 import bot.utils.Tokenizer
-import bot.wiki.PageType
+import bot.wiki.{WikiImage, WikiPage, PageType}
+import com.sun.prism.shader.AlphaOne_ImagePattern_AlphaTest_Loader
 
 object Evaluation extends BotApp {
 
@@ -63,25 +66,17 @@ object Evaluation extends BotApp {
             res
           }
         }
-      (page.title, pageImage)
+      (page, pageImage)
     }
 
-  val results = images.take(20).toList
-  results.foreach { res =>
-    print(res._1 + " : ")
-    res._2.foreach(im => print(im._1.url + ",  "))
-    println("\n\n")
+  images.take(5).foreach {
+    //case (_, Stream.empty) =>
+    case (page, im) =>
+      if (im.nonEmpty) {
+        val (_image, _file) = im.head
+        bot.add(page, _image, _file)
+        println("Add image for " + page.title + " with image " + _image.url)
+      }
   }
-
-  /*
-  println("Flickr result : ")
-  resFlickr.foreach(_._1.print())
-  println("Google result : ")
-  resGoogle.foreach(_._1.print())
-
-  println("\n\nTotal resutlts :")
-  println("\tFilckr : " + resFlickr.size)
-  println("\tGoogle : " + resGoogle.size)
-  */
 
 }

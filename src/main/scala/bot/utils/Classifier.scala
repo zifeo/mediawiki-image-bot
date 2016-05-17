@@ -14,7 +14,7 @@ object Classifier {
 
   def findPageType(title: String): PageType = title match {
     case dateYear() | dateComplete() | dateInterval() | temporalRef() => PageType.DATE
-    case locationRef() => PageType.LOCATION
+    case locationRef() => PageType.UNCLASSIFIED
     case literal() => PageType.LITERAL
     case _ => PageType.UNCLASSIFIED
   }
