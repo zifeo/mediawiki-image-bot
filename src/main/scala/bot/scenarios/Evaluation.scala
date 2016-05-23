@@ -5,8 +5,10 @@ import java.io.File
 import bot._
 import bot.providers.{FlickrSearch, GoogleSearch}
 import bot.utils.Tokenizer
-import bot.wiki.{WikiImage, WikiPage, PageType}
+import bot.wiki.{PageType, WikiImage, WikiPage}
 import com.sun.prism.shader.AlphaOne_ImagePattern_AlphaTest_Loader
+
+import scala.util.{Failure, Success, Try}
 
 object Evaluation extends BotApp {
 
@@ -18,9 +20,9 @@ object Evaluation extends BotApp {
     .allWikiPages
     .filter(p => allowedPageTypes.contains(p.pageType))
     .map { page =>
-      try {
+      Try {
         val pageArticle = bot.getArticle(page.title)
-        print("Page " + page.title)
+        log.info("Page " + page.title)
 
         val yearsInPage = Tokenizer.year(pageArticle)
 
@@ -29,67 +31,59 @@ object Evaluation extends BotApp {
             val average = yearsInPage.sum / yearsInPage.size
 
             if (average < config.getInt("yearThreshold")) {
-              print(" search on Google : ")
+              log.info(" search on Google : ")
 
               val res = GoogleSearch(page.title)
               if (res.isEmpty) {
-                println("no results")
+                log.info("no results")
                 FlickrSearch(page.title)
               } else {
-                println("ok")
+                log.info("ok")
                 res
               }
 
             } else {
-              print(" search Flickr : ")
+              log.info(" search Flickr : ")
               val res = FlickrSearch(page.title)
 
               if (res.isEmpty) {
-                println("no results")
+                log.info("no results")
                 GoogleSearch(page.title)
               }
               else {
-                println("ok")
+                log.info("ok")
                 res
               }
             }
 
           } else {
-            print(" search on Default : ")
+            log.info(" search on Default : ")
             val res = GoogleSearch(page.title)
 
             if (res.isEmpty) {
-              println("no results")
+              log.info("no results")
               FlickrSearch(page.title)
             } else {
-              println("ok")
+              log.info("ok")
               res
             }
           }
         (page, pageImage)
       }
-      catch {
-        case _ : Exception => (None, None)
-      }
     }
+
   var img_count = 0
   images.foreach {
-    //case (_, Stream.empty) =>
-    case (None, None) =>
-    case (page, im) =>
-      try {
-        if (im.nonEmpty) {
-          val (_image, _file) = im.head
+    case Failure(err) => log.warn("cannot process", err)
+    case Success((page @ WikiPage(title, _, _, _), (_image, _file) #:: _)) =>
           bot.add(page, _image, _file)
-          println("Add image for " + page.title + " with image " + _image.url)
+          println("Add image for " + title + " with image " + _image.url)
           img_count += 1
-          println(img_count + " Image added until now")
-        }
-      }
-      catch {
-        case _ : Exception => println("## ERROR ## page " + page.title)
-      }
+          log.info(img_count + " Image added until now")
+
+    case _ => log.warn("no action")
   }
-  println("\n\n################### END #################")
-  println(img_count + " Image added in total")
+
+  log.info("\n\n################### END #################")
+  log.info(img_count + " Image added in total")
 }
