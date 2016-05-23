@@ -12,7 +12,7 @@ object Evaluation extends BotApp {
 
   bot.signIn()
 
-  val allowedPageTypes = List(PageType.UNCLASSIFIED, PageType.LITERAL)
+  val allowedPageTypes = List(PageType.LITERAL)
 
   val images = bot
     .allWikiPages
@@ -69,7 +69,7 @@ object Evaluation extends BotApp {
       (page, pageImage)
     }
 
-  images.take(5).foreach {
+  images.take(30).foreach {
     //case (_, Stream.empty) =>
     case (page, im) =>
       if (im.nonEmpty) {
