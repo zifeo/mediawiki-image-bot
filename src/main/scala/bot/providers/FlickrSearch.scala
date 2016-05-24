@@ -2,17 +2,29 @@ package bot.providers
 
 import java.io.File
 
+import akka.stream.javadsl.Source
 import bot._
 import bot.wiki.WikiImage
 import com.flickr4java.flickr.photos.{SearchParameters, Size}
 import com.flickr4java.flickr.{Flickr, REST}
+import scala.io.Source
 
 import scala.collection.JavaConverters._
 
 object FlickrSearch {
 
   private val searchCount = 5
-  private val flickr = new Flickr(config.getString("flickr.key"), config.getString("flickr.secret"), new REST)
+  private val keySecret = loadFlickrKeyAndSecret()
+  private val flickr = new Flickr(keySecret._1, keySecret._2, new REST)
+
+  def loadFlickrKeyAndSecret() : (String, String) =  {
+    val filename = config.getString("flickrKeyAndSecretFile")
+    // Quick and dirty, we expect 2 lines, the first one being the key and the second one the secret
+    val lines = scala.io.Source.fromFile(filename).getLines()
+    val key = lines.next
+    val secret = lines.next
+    (key, secret)
+  }
 
   // http://creativecommons.org/licenses/x
   val licenses = Map(

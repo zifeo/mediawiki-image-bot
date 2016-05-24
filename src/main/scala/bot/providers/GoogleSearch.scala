@@ -16,11 +16,20 @@ object GoogleSearch {
   private val searchCount = 5
 
   private var keyIdx = 0
-  private val keys = config.getStringList("google.keys").asScala.toArray
+  private val keys = loadGoogleKeys().toArray
 
   private val apiUrl1 = "https://www.googleapis.com/customsearch/v1?q="
   private val apiUrl2 = "&cx=005581394676374455442%3Afihmnxuedsw&hl=fr&num="
   private val apiUrl3 = "&rights=cc_attribute&searchType=image&key="
+
+  def loadGoogleKeys() : List[String] = {
+    val filename = config.getString("googleKeysFile")
+    def inner(lines : Iterator[String], acc : List[String]) : List[String] = {
+      if (!lines.hasNext) acc
+      else inner(lines, lines.next() :: acc)
+    }
+    inner(Source.fromFile(filename).getLines(), List())
+  }
 
   def apply(terms: String): Stream[(WikiImage, File)] = {
     log.info("Google searching for {}", terms)

@@ -73,7 +73,7 @@ object Evaluation extends BotApp {
     }
 
   var img_count = 0
-  images.foreach {
+  images.take(3).foreach {
     case Failure(err) => log.warn("cannot process", err)
     case Success((page @ WikiPage(title, _, _, _), (_image, _file) #:: _)) =>
           bot.add(page, _image, _file)
