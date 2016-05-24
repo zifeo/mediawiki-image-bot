@@ -22,5 +22,8 @@ libraryDependencies ++= Seq(
   "com.flickr4java" % "flickr4java" % "2.16" exclude("log4j", "log4j"),
   "org.slf4j" % "log4j-over-slf4j" % "1.7.21",
   "org.scalacheck" %% "scalacheck" % "1.13.0" % "test",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+  "javax.mail" % "mail" % "1.4.7",
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.5.0" artifacts (Artifact("stanford-corenlp", "models"), Artifact("stanford-corenlp")),
+  "com.optimaize.languagedetector" % "language-detector" % "0.4"
 )
