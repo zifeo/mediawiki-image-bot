@@ -8,6 +8,7 @@ import bot.utils.Tokenizer
 import bot.wiki.{PageType, WikiImage, WikiPage}
 import com.sun.prism.shader.AlphaOne_ImagePattern_AlphaTest_Loader
 
+import scala.collection.immutable.Stream.#::
 import scala.util.{Failure, Success, Try}
 
 object Evaluation extends BotApp {
@@ -19,6 +20,7 @@ object Evaluation extends BotApp {
   val images = bot
     .allWikiPages
     .filter(p => allowedPageTypes.contains(p.pageType))
+    //.filter(x => x.title > "Aubonne" && x.title)
     .map { page =>
       Try {
         val pageArticle = bot.getArticle(page.title)
@@ -73,16 +75,23 @@ object Evaluation extends BotApp {
     }
 
   var img_count = 0
-  images.take(3).foreach {
-    case Failure(err) => log.warn("cannot process", err)
-    case Success((page @ WikiPage(title, _, _, _), (_image, _file) #:: _)) =>
-          bot.add(page, _image, _file)
+
+  images.foreach {
+      case Failure(err) => log.warn("cannot process", err); img_count += 1
+      case Success((page@WikiPage(title, _, _, _), (_image, _file) #:: _)) =>
+        try {
+          //bot.add(page, _image, _file)
+          log.info(page.title + " => " + img_count)
           println("Add image for " + title + " with image " + _image.url)
           img_count += 1
           log.info(img_count + " Image added until now")
+        }
+        catch {
+          case _ : Exception =>
+        }
 
-    case _ => log.warn("no action")
-  }
+      case _ => log.warn("no action")
+    }
 
   log.info("\n\n################### END #################")
   log.info(img_count + " Image added in total")

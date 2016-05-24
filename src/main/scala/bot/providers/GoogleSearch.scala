@@ -10,6 +10,7 @@ import spray.json._
 
 import scala.collection.JavaConverters._
 import scala.io.Source
+import scala.util.{Success, Try}
 
 object GoogleSearch {
 
@@ -45,17 +46,21 @@ object GoogleSearch {
     } else {
       res("items")
         .convertTo[List[JsObject]].toStream
-        .map { json =>
+        .flatMap { json =>
 
           val fields = json.fields
           val name = cleanName(fields("snippet").convertTo[String]).trim
           val description = fields.get("title").map(x => cleanName(x.convertTo[String]).take(200).trim).getOrElse(name)
           val link = fields("link").convertTo[String]
-          val file = tempFileFromStream(new URL(link).openStream())
-          val ext = link.reverse.takeWhile(_ != '.').reverse.toLowerCase
+          Try(new URL(link).openStream()) match {
+            case Success(str) if str.available() > 0 =>
+                val file = tempFileFromStream(str)
+                val ext = link.reverse.takeWhile(_ != '.').reverse.toLowerCase
 
-          log.debug("Found: {}", fields("snippet"))
-          WikiImage(s"$name.png", None, link, List.empty, description, "cc") -> file
+                log.debug("Found: {}", fields("snippet"))
+                Option(WikiImage(s"$name.png", None, link, List.empty, description, "cc") -> file)
+            case _ =>  None
+          }
         }
     }
   }

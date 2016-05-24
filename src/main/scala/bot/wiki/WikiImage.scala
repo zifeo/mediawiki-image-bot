@@ -11,7 +11,7 @@ case class WikiImage(
                     ) {
 
   def wikitag: String =
-    s"""[[File:$filename|thumb|200x200px|upright|$description]]\n"""
+    s"""[[File:$filename|thumb|200x200px|upright]]\n"""
 
   def print(): Unit = {
     println("WikiImage " + filename + " : ")
