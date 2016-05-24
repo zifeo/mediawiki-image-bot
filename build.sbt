@@ -24,3 +24,7 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.13.0" % "test",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
+
+assemblyJarName in assembly := "mediawiki-image-bot.jar"
+test in assembly := {}
+mainClass in assembly := Some("bot.scenarios.Main")
