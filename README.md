@@ -36,4 +36,4 @@ object BotASable extends BotApp {
 
 ### License
 
-Project is available under CC-BY-NC-SA 4.0 and data belong their owners under appropriate licensing.
+Project is available under [CC-BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/) and data belong their owners under appropriate licensing.
